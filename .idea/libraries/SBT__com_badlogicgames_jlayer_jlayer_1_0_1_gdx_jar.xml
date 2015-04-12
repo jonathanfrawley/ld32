@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="SBT: com.badlogicgames.jlayer:jlayer:1.0.1-gdx:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.badlogicgames.jlayer/jlayer/jars/jlayer-1.0.1-gdx.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.badlogicgames.jlayer/jlayer/docs/jlayer-1.0.1-gdx-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.badlogicgames.jlayer/jlayer/srcs/jlayer-1.0.1-gdx-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

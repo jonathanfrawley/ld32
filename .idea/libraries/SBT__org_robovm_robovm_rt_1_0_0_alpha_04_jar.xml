@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="SBT: org.robovm:robovm-rt:1.0.0-alpha-04:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.robovm/robovm-rt/jars/robovm-rt-1.0.0-alpha-04.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.robovm/robovm-rt/docs/robovm-rt-1.0.0-alpha-04-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.robovm/robovm-rt/srcs/robovm-rt-1.0.0-alpha-04-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

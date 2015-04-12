@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module external.linked.project.id="desktop" external.linked.project.path="$MODULE_DIR$/../../desktop" external.root.project.path="$MODULE_DIR$/../.." external.system.id="SBT" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/../../desktop/target/scala-2.11/classes" />
+    <output-test url="file://$MODULE_DIR$/../../desktop/target/scala-2.11/test-classes" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../../desktop">
+      <sourceFolder url="file://$MODULE_DIR$/../../desktop/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../desktop/src/main/scala" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../desktop/target/scala-2.11/src_managed/main" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../desktop/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../desktop/src/test/scala" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../desktop/target/scala-2.11/src_managed/test" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../desktop/assets" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../desktop/src/main/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../desktop/target/scala-2.11/resource_managed/main" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../desktop/src/test/resources" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../desktop/target/scala-2.11/resource_managed/test" type="java-test-resource" />
+      <excludeFolder url="file://$MODULE_DIR$/../../desktop/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="core" exported="" />
+    <orderEntry type="library" name="SBT: com.badlogicgames.gdx:gdx:1.4.1:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.badlogicgames.gdx:gdx-backend-lwjgl:1.4.1:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.badlogicgames.gdx:gdx-platform:1.4.1:natives-desktop:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.badlogicgames.jlayer:jlayer:1.0.1-gdx:jar" level="project" />
+    <orderEntry type="library" name="SBT: net.java.jinput:jinput:2.0.5:jar" level="project" />
+    <orderEntry type="library" name="SBT: net.java.jinput:jinput-platform:2.0.5:natives-linux:jar" level="project" />
+    <orderEntry type="library" name="SBT: net.java.jinput:jinput-platform:2.0.5:natives-osx:jar" level="project" />
+    <orderEntry type="library" name="SBT: net.java.jinput:jinput-platform:2.0.5:natives-windows:jar" level="project" />
+    <orderEntry type="library" name="SBT: net.java.jutils:jutils:1.0.0:jar" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="SBT: net.sf.proguard:proguard-base:4.11:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.jcraft:jorbis:0.0.17:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.lwjgl.lwjgl:lwjgl:2.9.1:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.lwjgl.lwjgl:lwjgl-platform:2.9.1:natives-linux:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.lwjgl.lwjgl:lwjgl-platform:2.9.1:natives-osx:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.lwjgl.lwjgl:lwjgl-platform:2.9.1:natives-windows:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.lwjgl.lwjgl:lwjgl_util:2.9.1:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scala-lang:scala-library:2.11.2:jar" level="project" />
+  </component>
+</module>

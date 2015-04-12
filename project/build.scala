@@ -57,6 +57,7 @@ object Settings {
     Tasks.assembly
   )
 
+/*
   lazy val android = core ++ Tasks.natives ++ androidBuild ++ Seq(
     libraryDependencies ++= Seq(
       "com.badlogicgames.gdx" % "gdx-backend-android" % libgdxVersion.value,
@@ -73,7 +74,7 @@ object Settings {
     proguardOptions in Android ++= scala.io.Source.fromFile(file("core/proguard-project.txt")).getLines.toList ++
                                    scala.io.Source.fromFile(file("android/proguard-project.txt")).getLines.toList
   )
-
+*/
   lazy val ios = core ++ Tasks.natives ++ Seq(
     unmanagedResources in Compile <++= (baseDirectory) map { _ =>
       (file("android/assets") ** "*").get
@@ -169,12 +170,13 @@ object LibgdxBuild extends Build {
     settings = Settings.desktop ++ SbtOneJar.oneJarSettings
   ).dependsOn(core)
 
+/*
   lazy val android = Project(
     id       = "android",
     base     = file("android"),
     settings = Settings.android
   ).dependsOn(core)
-
+*/
   lazy val ios = RobovmProject(
     id       = "ios",
     base     = file("ios"),
@@ -185,6 +187,7 @@ object LibgdxBuild extends Build {
     id       = "all-platforms",
     base     = file("."),
     settings = Settings.core
-  ).aggregate(core, desktop, android, ios)
+  ).aggregate(core, desktop, ios)
+//  ).aggregate(core, desktop, android, ios)
 }
 

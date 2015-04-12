@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module external.linked.project.id="ios" external.linked.project.path="$MODULE_DIR$/../../ios" external.root.project.path="$MODULE_DIR$/../.." external.system.id="SBT" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/../../ios/target/scala-2.11/classes" />
+    <output-test url="file://$MODULE_DIR$/../../ios/target/scala-2.11/test-classes" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../../ios">
+      <sourceFolder url="file://$MODULE_DIR$/../../ios/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../ios/src/main/scala" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../ios/target/scala-2.11/src_managed/main" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../ios/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../ios/src/test/scala" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../ios/target/scala-2.11/src_managed/test" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../ios/src/main/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../ios/target/scala-2.11/resource_managed/main" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../ios/src/test/resources" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../ios/target/scala-2.11/resource_managed/test" type="java-test-resource" />
+      <excludeFolder url="file://$MODULE_DIR$/../../ios/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="core" exported="" />
+    <orderEntry type="library" name="SBT: com.badlogicgames.gdx:gdx:1.4.1:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.badlogicgames.gdx:gdx-backend-robovm:1.4.1:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.robovm:robovm-cocoatouch:1.0.0-alpha-04:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.robovm:robovm-objc:1.0.0-alpha-04:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.robovm:robovm-rt:1.0.0-alpha-04:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scala-lang:scala-library:2.11.2:jar" level="project" />
+  </component>
+</module>
