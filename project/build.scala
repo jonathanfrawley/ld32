@@ -4,6 +4,7 @@ import Keys._
 import android.Keys._
 import android.Plugin.androidBuild
 import sbtrobovm.RobovmPlugin._
+import com.github.retronym.SbtOneJar
 
 object Settings {
   import LibgdxBuild.libgdxVersion
@@ -159,13 +160,13 @@ object LibgdxBuild extends Build {
   lazy val core = Project(
     id       = "core",
     base     = file("core"),
-    settings = Settings.core
+    settings = Settings.core 
   )
 
   lazy val desktop = Project(
     id       = "desktop",
     base     = file("desktop"),
-    settings = Settings.desktop
+    settings = Settings.desktop ++ SbtOneJar.oneJarSettings
   ).dependsOn(core)
 
   lazy val android = Project(
