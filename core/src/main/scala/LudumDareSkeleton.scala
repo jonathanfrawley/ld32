@@ -3,11 +3,9 @@ package ludumdare32
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys
-import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.OrthographicCamera
-import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.{Texture, OrthographicCamera, GL20}
+import com.badlogic.gdx.graphics.g2d.{Animation, TextureRegion, SpriteBatch}
 import com.badlogic.gdx.math.{MathUtils, Vector3, Rectangle}
-import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.utils.TimeUtils
 
 import scala.collection.mutable.ArrayBuffer
@@ -22,6 +20,16 @@ class LudumDareSkeleton extends Game {
   var bucket = new Rectangle()
   var raindrops = new ArrayBuffer[Rectangle]()
   var lastDropTime : Long = 0
+  //Animation
+  val FRAME_COLS = 6
+  val FRAME_ROWS = 5
+  var walkAnimation : Animation = null
+  var walkSheet : Texture = null
+  var walkFrames : com.badlogic.gdx.utils.Array[TextureRegion] = null
+  var spriteBatch : SpriteBatch = null
+  var currentFrame : TextureRegion = null
+  var stateTime : Float = 0
+
 
   override def create() {
     // start the playback of the background music immediately
@@ -36,6 +44,22 @@ class LudumDareSkeleton extends Game {
     bucket.height = 64
 
     spawnRaindrop()
+
+    //Animation stuff
+    walkSheet = new Texture(Gdx.files.internal("animation_sheet.png"))
+    val tmp = TextureRegion.split(walkSheet, walkSheet.getWidth()/FRAME_COLS, walkSheet.getHeight()/FRAME_ROWS)
+    println("tmp.length " + tmp.length)
+    println("tmp2.length " + tmp(0).length)
+    walkFrames = new com.badlogic.gdx.utils.Array[TextureRegion](FRAME_COLS * FRAME_ROWS)
+    for(i <- 0 to FRAME_ROWS-1) {
+      for(j <- 0 to FRAME_COLS-1){
+        println("i " + i + " j " + walkFrames.size)
+        walkFrames.add(tmp(i)(j))
+      }
+    }
+    walkAnimation = new Animation(0.025f, walkFrames)
+    spriteBatch = new SpriteBatch()
+    stateTime = 0f
   }
 
   override def render() {
@@ -88,6 +112,13 @@ class LudumDareSkeleton extends Game {
       batch.draw(dropImage, raindrop.x, raindrop.y)
     }
     batch.end()
+
+    // Animation stuff
+    stateTime += Gdx.graphics.getDeltaTime()
+    currentFrame = walkAnimation.getKeyFrame(stateTime, true)
+    spriteBatch.begin()
+    spriteBatch.draw(currentFrame, 50, 50)
+    spriteBatch.end()
 
   }
 
