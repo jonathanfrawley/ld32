@@ -3,8 +3,8 @@ package ludumdare32
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys
-import com.badlogic.gdx.graphics.{Texture, OrthographicCamera, GL20}
-import com.badlogic.gdx.graphics.g2d.{Animation, TextureRegion, SpriteBatch}
+import com.badlogic.gdx.graphics.{Color, Texture, OrthographicCamera, GL20}
+import com.badlogic.gdx.graphics.g2d.{BitmapFont, Animation, TextureRegion, SpriteBatch}
 import com.badlogic.gdx.math.{MathUtils, Vector3, Rectangle}
 import com.badlogic.gdx.utils.TimeUtils
 
@@ -29,6 +29,8 @@ class LudumDareSkeleton extends Game {
   var spriteBatch : SpriteBatch = null
   var currentFrame : TextureRegion = null
   var stateTime : Float = 0
+  //fonts
+  var font : BitmapFont = null
 
 
   override def create() {
@@ -60,6 +62,10 @@ class LudumDareSkeleton extends Game {
     walkAnimation = new Animation(0.025f, walkFrames)
     spriteBatch = new SpriteBatch()
     stateTime = 0f
+
+    //fonts
+    font = new BitmapFont()
+    font.setColor(Color.RED)
   }
 
   override def render() {
@@ -119,6 +125,11 @@ class LudumDareSkeleton extends Game {
     spriteBatch.begin()
     spriteBatch.draw(currentFrame, 50, 50)
     spriteBatch.end()
+
+    // font
+    batch.begin()
+    font.draw(batch, "Hello World", 200, 200)
+    batch.end()
 
   }
 
