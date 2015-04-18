@@ -15,10 +15,15 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
   lazy val dropImage = new Texture(Gdx.files.internal("droplet.png"))
   */
   lazy val grannyImage = new Texture(Gdx.files.internal("granny.png"))
+  lazy val fryingPanImage = new Texture(Gdx.files.internal("frying_pan.png"))
+  lazy val ironImage = new Texture(Gdx.files.internal("iron.png"))
+  lazy val ironingBoardImage = new Texture(Gdx.files.internal("ironing_board.png"))
   lazy val camera = new OrthographicCamera()
   lazy val game.batch = new SpriteBatch()
   //lazy var granny = new Sprite(grannyImage)
   lazy val granny = new Rectangle()
+  lazy val fryingPan = new Rectangle()
+
   //var raindrops = new ArrayBuffer[Rectangle]()
   //var lastDropTime : Long = 0
   //Animation
@@ -50,6 +55,9 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
   granny.x = gameWidth / 2 - granny.width / 2
   granny.y = 20
 
+  fryingPan.width = 32
+  fryingPan.height = 16
+
   //spawnRaindrop()
 
   /*
@@ -79,10 +87,14 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
     camera.update()
 
+    fryingPan.x = granny.x+granny.width * 0.95f
+    fryingPan.y = granny.y+granny.height * 0.29f
+
     game.batch.setProjectionMatrix(camera.combined)
     game.batch.begin()
     //game.batch.draw(grannyImage, granny.x, granny.y)
     game.batch.draw(grannyImage, granny.x, granny.y, granny.width, granny.height)
+    game.batch.draw(fryingPanImage, fryingPan.x, fryingPan.y, fryingPan.width, fryingPan.height)
     game.batch.end()
 
     //Handle input
