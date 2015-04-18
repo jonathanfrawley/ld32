@@ -263,7 +263,7 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
     if(granny.x < 0) granny.x = 0
     if(granny.x > gameWidth - granny.width) granny.x = gameWidth - granny.width
     if(granny.y < 0) granny.y = 0
-    if(granny.y > gameHeight - granny.height) granny.y = gameHeight - granny.height
+    if(granny.y > (gameHeight * 0.9f) - granny.height) granny.y = (gameHeight * 0.9f)- granny.height
 
     //if(TimeUtils.nanoTime - lastDropTime > 1000000000) spawnRaindrop()
 
