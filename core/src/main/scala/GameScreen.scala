@@ -23,6 +23,7 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
   //lazy var granny = new Sprite(grannyImage)
   lazy val granny = new Rectangle()
   lazy val fryingPan = new Rectangle()
+  var fryingPanRot = 90.0f
 
   //var raindrops = new ArrayBuffer[Rectangle]()
   //var lastDropTime : Long = 0
@@ -89,12 +90,16 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
 
     fryingPan.x = granny.x+granny.width * 0.95f
     fryingPan.y = granny.y+granny.height * 0.29f
+    fryingPanRot -= 1.0f;
+    if(fryingPanRot < 0.0f) fryingPanRot = 90.0f
 
     game.batch.setProjectionMatrix(camera.combined)
     game.batch.begin()
     //game.batch.draw(grannyImage, granny.x, granny.y)
     game.batch.draw(grannyImage, granny.x, granny.y, granny.width, granny.height)
-    game.batch.draw(fryingPanImage, fryingPan.x, fryingPan.y, fryingPan.width, fryingPan.height)
+    //game.batch.draw(fryingPanImage, fryingPan.x, fryingPan.y, fryingPan.width, fryingPan.height)
+
+    game.batch.draw(fryingPanImage, fryingPan.x, fryingPan.y, fryingPan.height*0.1f, fryingPan.height/2, fryingPan.width, fryingPan.height, 1.0f, 1.0f, fryingPanRot, 0, 0, fryingPanImage.getWidth, fryingPanImage.getHeight, false, false)
     game.batch.end()
 
     //Handle input
