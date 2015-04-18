@@ -224,6 +224,12 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
   override def render(delta:Float) {
     Gdx.gl.glClearColor(0, 0, 0.2f, 1)
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
+
+    val lerp = 0.05f
+    var diff = (granny.x - camera.position.x) * lerp
+    val smallVal = 0.1
+    if(diff < smallVal && diff > -smallVal) diff = 0.0f
+    camera.position.set(camera.position.x + diff, camera.position.y, 0)
     camera.update()
 
     fryingPanUpdate
@@ -269,11 +275,14 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
     // Stay within limits
     val limitPct = 0.75f
     if(granny.x < 0) granny.x = 0
-    if(granny.x > gameWidth - granny.width) granny.x = gameWidth - granny.width
+    //if(granny.x > gameWidth - granny.width) granny.x = gameWidth - granny.width
     if(granny.y < 0) granny.y = 0
     if(granny.y > (gameHeight * limitPct) - granny.height) granny.y = (gameHeight * limitPct) - granny.height
 
-    background.x = 300 - granny.x;
+    //background.x = 300 - granny.x;
+
+    //camera.lookAt(granny.x, granny.y, 0)
+    //camera.translate(0.1f, 0.0f, 0.0f)
 
     //if(TimeUtils.nanoTime - lastDropTime > 1000000000) spawnRaindrop()
 
