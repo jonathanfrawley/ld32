@@ -1,12 +1,46 @@
 package ludumdare32
 import com.badlogic.gdx.Input.Keys
+import com.badlogic.gdx.utils.Timer.Task
+
 import com.badlogic.gdx.{Gdx, Screen}
 import com.badlogic.gdx.graphics.g2d._
 import com.badlogic.gdx.graphics.{Color, GL20, OrthographicCamera, Texture}
 import com.badlogic.gdx.math.{MathUtils, Rectangle, Vector3}
-import com.badlogic.gdx.utils.TimeUtils
+import com.badlogic.gdx.utils.{Timer, TimeUtils}
 
 import scala.collection.mutable.ArrayBuffer
+
+class Iron(var lookingRight:Boolean) {
+  var rot = 0.0f
+  val rect = new Rectangle()
+  rect.width = 20
+  rect.height = 10
+  var isAttacking = false
+
+  def update(gameScreen: GameScreen): Unit = {
+    val ironAngVelocity = 9.0f
+    val ironSpeed = 9.0f
+    if(lookingRight) {
+      if (isAttacking) {
+        rot -= ironAngVelocity
+        rect.x += ironSpeed
+      } else {
+        rect.x = gameScreen.granny.x + gameScreen.granny.width * 0.75f
+        rect.y = gameScreen.granny.y + gameScreen.granny.height * 0.29f
+        rot = 0
+      }
+    } else {
+      if (isAttacking) {
+        rot += ironAngVelocity
+        rect.x -= ironSpeed
+      } else {
+        rect.x = gameScreen.granny.x - gameScreen.granny.width * 0.50f
+        rect.y = gameScreen.granny.y + gameScreen.granny.height * 0.29f
+        rot = 0
+      }
+    }
+  }
+}
 
 class GameScreen (game: LudumDareSkeleton) extends Screen {
 
@@ -23,8 +57,10 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
   */
   lazy val grannyImage = new Texture(Gdx.files.internal("granny.png"))
   lazy val fryingPanImage = new Texture(Gdx.files.internal("frying_pan.png"))
+
   lazy val ironImage = new Texture(Gdx.files.internal("iron.png"))
   lazy val ironingBoardImage = new Texture(Gdx.files.internal("ironing_board.png"))
+
   lazy val camera = new OrthographicCamera()
   lazy val game.batch = new SpriteBatch()
   //lazy var granny = new Sprite(grannyImage)
@@ -34,8 +70,10 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
   var isAttacking = false
   lazy val fryingPan = new Rectangle()
   var fryingPanRot = 90.0f
-  lazy val iron = new Rectangle()
-  var ironRot = 0.0f
+  //lazy val activeIron = new Rectangle()
+  //var activeIronRot = 0.0f
+  var activeIron = new Iron(false)
+  var irons = new ArrayBuffer[Iron]()
   // Shield
   var isDefending = false
   lazy val ironingBoard = new Rectangle()
@@ -75,9 +113,6 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
   fryingPan.width = 32
   fryingPan.height = 16
 
-  iron.width = 20
-  iron.height = 10
-
   ironingBoard.width = 20
   ironingBoard.height = 80
 
@@ -104,56 +139,69 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
   //fonts
   font = new BitmapFont()
   font.setColor(Color.RED)
+  var scheduled = false
 
   def fryingPanUpdate(): Unit = {
-    val fryingPanSpeed = 9.0f
-    if(lookingRight) {
-      fryingPan.x = granny.x + granny.width * 0.95f
-      fryingPan.y = granny.y + granny.height * 0.29f
-      if (isAttacking) {
-        fryingPanRot -= fryingPanSpeed
-        if (fryingPanRot < 0.0f) {
+    if(weaponType == FryingPan) {
+      val fryingPanSpeed = 9.0f
+      if (lookingRight) {
+        fryingPan.x = granny.x + granny.width * 0.95f
+        fryingPan.y = granny.y + granny.height * 0.29f
+        if (isAttacking) {
+          fryingPanRot -= fryingPanSpeed
+          if (fryingPanRot < 0.0f) {
+            fryingPanRot = 90.0f
+            isAttacking = false
+          }
+        } else {
           fryingPanRot = 90.0f
-          isAttacking = false
         }
       } else {
-        fryingPanRot = 90.0f
-      }
-    } else {
-      fryingPan.x = granny.x - granny.width * 0.10f
-      fryingPan.y = granny.y + granny.height * 0.29f
-      if (isAttacking) {
-        fryingPanRot += fryingPanSpeed
-        if (fryingPanRot > 180.0f) {
+        fryingPan.x = granny.x - granny.width * 0.10f
+        fryingPan.y = granny.y + granny.height * 0.29f
+        if (isAttacking) {
+          fryingPanRot += fryingPanSpeed
+          if (fryingPanRot > 180.0f) {
+            fryingPanRot = 90.0f
+            isAttacking = false
+          }
+        } else {
           fryingPanRot = 90.0f
-          isAttacking = false
         }
-      } else {
-        fryingPanRot = 90.0f
       }
     }
   }
 
   def ironUpdate(): Unit = {
-    val ironAngVelocity = 9.0f
-    val ironSpeed = 9.0f
-    if(lookingRight) {
-      if (isAttacking) {
-        ironRot -= ironAngVelocity
-        iron.x += ironSpeed
+    if(weaponType == Iron) {
+      if (activeIron != null && isAttacking) {
+        activeIron.isAttacking = true
+        irons += activeIron
+        activeIron = null
+        scheduled = true
+        Timer.schedule(new Task {
+          override def run(): Unit = {
+            println("HI")
+            isAttacking = false
+            scheduled = false
+          }
+        }, 1.0f)
       } else {
-        iron.x = granny.x + granny.width * 0.75f
-        iron.y = granny.y + granny.height * 0.29f
-        ironRot = 0
+        if (activeIron == null && !isAttacking) {
+          activeIron = new Iron(lookingRight)
+        }/* else {
+          if(activeIron==null && isAttacking && !scheduled) {
+            activeIron = new Iron(lookingRight)
+          }
+        }*/
       }
-    } else {
-      if (isAttacking) {
-        ironRot += ironAngVelocity
-        iron.x -= ironSpeed
-      } else {
-        iron.x = granny.x - granny.width * 0.50f
-        iron.y = granny.y + granny.height * 0.29f
-        ironRot = 0
+    }
+    if(activeIron != null) {
+      activeIron.update(this)
+      activeIron.lookingRight = lookingRight
+    }
+    irons.foreach { case iron => {
+        iron.update(this)
       }
     }
   }
@@ -172,8 +220,8 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
     camera.update()
 
-    if(weaponType == FryingPan) fryingPanUpdate
-    if(weaponType == Iron) ironUpdate
+    fryingPanUpdate
+    ironUpdate
     ironingBoardUpdate
 
     game.batch.setProjectionMatrix(camera.combined)
@@ -185,8 +233,10 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
       game.batch.draw(ironingBoardImage, ironingBoard.x, ironingBoard.y, ironingBoard.height/2, ironingBoard.height/2, ironingBoard.width, ironingBoard.height, 1.0f, 1.0f, 0, 0, 0, ironingBoardImage.getWidth, ironingBoardImage.getHeight, false, false)
     } else {
       if(weaponType == FryingPan) game.batch.draw(fryingPanImage, fryingPan.x, fryingPan.y, fryingPan.height*0.1f, fryingPan.height/2, fryingPan.width, fryingPan.height, 1.0f, 1.0f, fryingPanRot, 0, 0, fryingPanImage.getWidth, fryingPanImage.getHeight, false, false)
-      if(weaponType == Iron) game.batch.draw(ironImage, iron.x, iron.y, iron.width/2, iron.height/2, iron.width, iron.height, 1.0f, 1.0f, ironRot, 0, 0, ironImage.getWidth, ironImage.getHeight, lookingRight, false)
+      if(weaponType == Iron && activeIron != null) game.batch.draw(ironImage, activeIron.rect.x, activeIron.rect.y, activeIron.rect.width/2, activeIron.rect.height/2, activeIron.rect.width, activeIron.rect.height, 1.0f, 1.0f, activeIron.rot, 0, 0, ironImage.getWidth, ironImage.getHeight, lookingRight, false)
     }
+
+    irons.foreach { case iron => game.batch.draw(ironImage, iron.rect.x, iron.rect.y, iron.rect.width / 2, iron.rect.height / 2, iron.rect.width, iron.rect.height, 1.0f, 1.0f, iron.rot, 0, 0, ironImage.getWidth, ironImage.getHeight, iron.lookingRight, false) }
     game.batch.end()
 
     //Handle input
@@ -211,7 +261,7 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
 
     // Stay within limits
     if(granny.x < 0) granny.x = 0
-    if(granny.x > gameWidth - granny.width)  granny.x = gameWidth - granny.width
+    if(granny.x > gameWidth - granny.width) granny.x = gameWidth - granny.width
     if(granny.y < 0) granny.y = 0
     if(granny.y > gameHeight - granny.height) granny.y = gameHeight - granny.height
 
