@@ -9,6 +9,13 @@ import com.badlogic.gdx.utils.TimeUtils
 import scala.collection.mutable.ArrayBuffer
 
 class GameScreen (game: LudumDareSkeleton) extends Screen {
+
+  object WeaponType extends Enumeration {
+    type WeaponType = Value
+    val FryingPan = Value
+  }
+  import WeaponType._
+
   /*
   lazy val dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.wav"))
   lazy val rainMusic = Gdx.audio.newMusic(Gdx.files.internal("rain.mp3"))
@@ -23,7 +30,9 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
   //lazy var granny = new Sprite(grannyImage)
   lazy val granny = new Rectangle()
   lazy val fryingPan = new Rectangle()
+  var weaponType = FryingPan
   var fryingPanRot = 90.0f
+  var fryingPanAttacking = false
 
   //var raindrops = new ArrayBuffer[Rectangle]()
   //var lastDropTime : Long = 0
@@ -38,6 +47,7 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
   */
   var currentFrame : TextureRegion = null
   var stateTime : Float = 0
+  var lookingRight : Boolean = false
   //fonts
   var font : BitmapFont = null
 
@@ -88,18 +98,35 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
     camera.update()
 
-    fryingPan.x = granny.x+granny.width * 0.95f
-    fryingPan.y = granny.y+granny.height * 0.29f
-    fryingPanRot -= 1.0f;
-    if(fryingPanRot < 0.0f) fryingPanRot = 90.0f
+    val fryingPanSpeed = 9.0f
+    if(lookingRight) {
+      fryingPan.x = granny.x + granny.width * 0.95f
+      fryingPan.y = granny.y + granny.height * 0.29f
+      if (fryingPanAttacking) {
+        fryingPanRot -= fryingPanSpeed
+        if (fryingPanRot < 0.0f) {
+          fryingPanRot = 90.0f
+          fryingPanAttacking = false
+        }
+      }
+    } else {
+      fryingPan.x = granny.x - granny.width * 0.10f
+      fryingPan.y = granny.y + granny.height * 0.29f
+      if (fryingPanAttacking) {
+        fryingPanRot += fryingPanSpeed
+        if (fryingPanRot > 180.0f) {
+          fryingPanRot = 90.0f
+          fryingPanAttacking = false
+        }
+      }
+    }
 
     game.batch.setProjectionMatrix(camera.combined)
     game.batch.begin()
     //game.batch.draw(grannyImage, granny.x, granny.y)
     game.batch.draw(grannyImage, granny.x, granny.y, granny.width, granny.height)
     //game.batch.draw(fryingPanImage, fryingPan.x, fryingPan.y, fryingPan.width, fryingPan.height)
-
-    game.batch.draw(fryingPanImage, fryingPan.x, fryingPan.y, fryingPan.height*0.1f, fryingPan.height/2, fryingPan.width, fryingPan.height, 1.0f, 1.0f, fryingPanRot, 0, 0, fryingPanImage.getWidth, fryingPanImage.getHeight, false, false)
+    if(weaponType == FryingPan) game.batch.draw(fryingPanImage, fryingPan.x, fryingPan.y, fryingPan.height*0.1f, fryingPan.height/2, fryingPan.width, fryingPan.height, 1.0f, 1.0f, fryingPanRot, 0, 0, fryingPanImage.getWidth, fryingPanImage.getHeight, false, false)
     game.batch.end()
 
     //Handle input
@@ -113,10 +140,11 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
     */
     val grannyXSpeed = 300
     val grannyYSpeed = 200
-    if(Gdx.input.isKeyPressed(Keys.A)) granny.x -= grannyXSpeed * Gdx.graphics.getDeltaTime
-    if(Gdx.input.isKeyPressed(Keys.D)) granny.x += grannyXSpeed * Gdx.graphics.getDeltaTime
+    if(Gdx.input.isKeyPressed(Keys.A)) { granny.x -= grannyXSpeed * Gdx.graphics.getDeltaTime; lookingRight = false }
+    if(Gdx.input.isKeyPressed(Keys.D)) { granny.x += grannyXSpeed * Gdx.graphics.getDeltaTime; lookingRight = true }
     if(Gdx.input.isKeyPressed(Keys.S)) granny.y -= grannyYSpeed * Gdx.graphics.getDeltaTime
     if(Gdx.input.isKeyPressed(Keys.W)) granny.y += grannyYSpeed * Gdx.graphics.getDeltaTime
+    if(!fryingPanAttacking && Gdx.input.isKeyPressed(Keys.SPACE)) fryingPanAttacking = true
 
     // Stay within limits
     if(granny.x < 0) granny.x = 0
