@@ -61,6 +61,8 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
   lazy val ironImage = new Texture(Gdx.files.internal("iron.png"))
   lazy val ironingBoardImage = new Texture(Gdx.files.internal("ironing_board.png"))
 
+  lazy val backgroundImage = new Texture(Gdx.files.internal("background_granny.png"))
+
   lazy val camera = new OrthographicCamera()
   lazy val game.batch = new SpriteBatch()
   //lazy var granny = new Sprite(grannyImage)
@@ -77,6 +79,8 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
   // Shield
   var isDefending = false
   lazy val ironingBoard = new Rectangle()
+
+  lazy val background = new Rectangle()
 
   //var raindrops = new ArrayBuffer[Rectangle]()
   //var lastDropTime : Long = 0
@@ -115,6 +119,9 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
 
   ironingBoard.width = 20
   ironingBoard.height = 80
+
+  background.width = gameWidth
+  background.height = gameHeight
 
   //spawnRaindrop()
 
@@ -181,7 +188,6 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
         scheduled = true
         Timer.schedule(new Task {
           override def run(): Unit = {
-            println("HI")
             isAttacking = false
             scheduled = false
           }
@@ -226,6 +232,7 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
 
     game.batch.setProjectionMatrix(camera.combined)
     game.batch.begin()
+    game.batch.draw(backgroundImage, background.x, background.y, background.width, background.height)
     //game.batch.draw(grannyImage, granny.x, granny.y)
     game.batch.draw(grannyImage, granny.x, granny.y, granny.width, granny.height)
     //game.batch.draw(fryingPanImage, fryingPan.x, fryingPan.y, fryingPan.width, fryingPan.height)
@@ -260,10 +267,13 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
     if(!isDefending && !isAttacking && Gdx.input.isKeyPressed(Keys.SPACE)) isAttacking = true
 
     // Stay within limits
+    val limitPct = 0.75f
     if(granny.x < 0) granny.x = 0
     if(granny.x > gameWidth - granny.width) granny.x = gameWidth - granny.width
     if(granny.y < 0) granny.y = 0
-    if(granny.y > (gameHeight * 0.9f) - granny.height) granny.y = (gameHeight * 0.9f)- granny.height
+    if(granny.y > (gameHeight * limitPct) - granny.height) granny.y = (gameHeight * limitPct) - granny.height
+
+    background.x = 300 - granny.x;
 
     //if(TimeUtils.nanoTime - lastDropTime > 1000000000) spawnRaindrop()
 
