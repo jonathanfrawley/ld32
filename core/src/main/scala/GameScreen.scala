@@ -12,7 +12,7 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
 
   object WeaponType extends Enumeration {
     type WeaponType = Value
-    val FryingPan = Value
+    val FryingPan, Iron = Value
   }
   import WeaponType._
 
@@ -29,10 +29,16 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
   lazy val game.batch = new SpriteBatch()
   //lazy var granny = new Sprite(grannyImage)
   lazy val granny = new Rectangle()
-  lazy val fryingPan = new Rectangle()
+  //Weapons
   var weaponType = FryingPan
+  var isAttacking = false
+  lazy val fryingPan = new Rectangle()
   var fryingPanRot = 90.0f
-  var fryingPanAttacking = false
+  lazy val iron = new Rectangle()
+  var ironRot = 0.0f
+  // Shield
+  var isDefending = false
+  lazy val ironingBoard = new Rectangle()
 
   //var raindrops = new ArrayBuffer[Rectangle]()
   //var lastDropTime : Long = 0
@@ -69,6 +75,12 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
   fryingPan.width = 32
   fryingPan.height = 16
 
+  iron.width = 20
+  iron.height = 10
+
+  ironingBoard.width = 20
+  ironingBoard.height = 80
+
   //spawnRaindrop()
 
   /*
@@ -93,58 +105,109 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
   font = new BitmapFont()
   font.setColor(Color.RED)
 
+  def fryingPanUpdate(): Unit = {
+    val fryingPanSpeed = 9.0f
+    if(lookingRight) {
+      fryingPan.x = granny.x + granny.width * 0.95f
+      fryingPan.y = granny.y + granny.height * 0.29f
+      if (isAttacking) {
+        fryingPanRot -= fryingPanSpeed
+        if (fryingPanRot < 0.0f) {
+          fryingPanRot = 90.0f
+          isAttacking = false
+        }
+      } else {
+        fryingPanRot = 90.0f
+      }
+    } else {
+      fryingPan.x = granny.x - granny.width * 0.10f
+      fryingPan.y = granny.y + granny.height * 0.29f
+      if (isAttacking) {
+        fryingPanRot += fryingPanSpeed
+        if (fryingPanRot > 180.0f) {
+          fryingPanRot = 90.0f
+          isAttacking = false
+        }
+      } else {
+        fryingPanRot = 90.0f
+      }
+    }
+  }
+
+  def ironUpdate(): Unit = {
+    val ironAngVelocity = 9.0f
+    val ironSpeed = 9.0f
+    if(lookingRight) {
+      if (isAttacking) {
+        ironRot -= ironAngVelocity
+        iron.x += ironSpeed
+      } else {
+        iron.x = granny.x + granny.width * 0.75f
+        iron.y = granny.y + granny.height * 0.29f
+        ironRot = 0
+      }
+    } else {
+      if (isAttacking) {
+        ironRot += ironAngVelocity
+        iron.x -= ironSpeed
+      } else {
+        iron.x = granny.x - granny.width * 0.50f
+        iron.y = granny.y + granny.height * 0.29f
+        ironRot = 0
+      }
+    }
+  }
+
+  def ironingBoardUpdate(): Unit = {
+    ironingBoard.y = granny.y + granny.height * 0.0f
+    if(lookingRight) {
+      ironingBoard.x = granny.x + granny.width * 0.75f
+    } else {
+      ironingBoard.x = granny.x - granny.width * 0.50f
+    }
+  }
+
   override def render(delta:Float) {
     Gdx.gl.glClearColor(0, 0, 0.2f, 1)
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
     camera.update()
 
-    val fryingPanSpeed = 9.0f
-    if(lookingRight) {
-      fryingPan.x = granny.x + granny.width * 0.95f
-      fryingPan.y = granny.y + granny.height * 0.29f
-      if (fryingPanAttacking) {
-        fryingPanRot -= fryingPanSpeed
-        if (fryingPanRot < 0.0f) {
-          fryingPanRot = 90.0f
-          fryingPanAttacking = false
-        }
-      }
-    } else {
-      fryingPan.x = granny.x - granny.width * 0.10f
-      fryingPan.y = granny.y + granny.height * 0.29f
-      if (fryingPanAttacking) {
-        fryingPanRot += fryingPanSpeed
-        if (fryingPanRot > 180.0f) {
-          fryingPanRot = 90.0f
-          fryingPanAttacking = false
-        }
-      }
-    }
+    if(weaponType == FryingPan) fryingPanUpdate
+    if(weaponType == Iron) ironUpdate
+    ironingBoardUpdate
 
     game.batch.setProjectionMatrix(camera.combined)
     game.batch.begin()
     //game.batch.draw(grannyImage, granny.x, granny.y)
     game.batch.draw(grannyImage, granny.x, granny.y, granny.width, granny.height)
     //game.batch.draw(fryingPanImage, fryingPan.x, fryingPan.y, fryingPan.width, fryingPan.height)
-    if(weaponType == FryingPan) game.batch.draw(fryingPanImage, fryingPan.x, fryingPan.y, fryingPan.height*0.1f, fryingPan.height/2, fryingPan.width, fryingPan.height, 1.0f, 1.0f, fryingPanRot, 0, 0, fryingPanImage.getWidth, fryingPanImage.getHeight, false, false)
+    if(isDefending) {
+      game.batch.draw(ironingBoardImage, ironingBoard.x, ironingBoard.y, ironingBoard.height/2, ironingBoard.height/2, ironingBoard.width, ironingBoard.height, 1.0f, 1.0f, 0, 0, 0, ironingBoardImage.getWidth, ironingBoardImage.getHeight, false, false)
+    } else {
+      if(weaponType == FryingPan) game.batch.draw(fryingPanImage, fryingPan.x, fryingPan.y, fryingPan.height*0.1f, fryingPan.height/2, fryingPan.width, fryingPan.height, 1.0f, 1.0f, fryingPanRot, 0, 0, fryingPanImage.getWidth, fryingPanImage.getHeight, false, false)
+      if(weaponType == Iron) game.batch.draw(ironImage, iron.x, iron.y, iron.width/2, iron.height/2, iron.width, iron.height, 1.0f, 1.0f, ironRot, 0, 0, ironImage.getWidth, ironImage.getHeight, lookingRight, false)
+    }
     game.batch.end()
 
     //Handle input
-    /*
+    if(Gdx.input.isKeyPressed(Keys.NUM_1)) weaponType = FryingPan
+    if(Gdx.input.isKeyPressed(Keys.NUM_2)) weaponType = Iron
+    isDefending = Gdx.input.isKeyPressed(Keys.J)
+      /*
     if(Gdx.input.isTouched) {
-      val touchPos = new Vector3
-      touchPos.set(Gdx.input.getX, Gdx.input.getY, 0)
-      camera.unproject(touchPos)
-      granny.x = touchPos.x - 64 / 2
-    }
-    */
+        val touchPos = new Vector3
+        touchPos.set(Gdx.input.getX, Gdx.input.getY, 0)
+        camera.unproject(touchPos)
+        granny.x = touchPos.x - 64 / 2
+      }
+      */
     val grannyXSpeed = 300
     val grannyYSpeed = 200
     if(Gdx.input.isKeyPressed(Keys.A)) { granny.x -= grannyXSpeed * Gdx.graphics.getDeltaTime; lookingRight = false }
     if(Gdx.input.isKeyPressed(Keys.D)) { granny.x += grannyXSpeed * Gdx.graphics.getDeltaTime; lookingRight = true }
     if(Gdx.input.isKeyPressed(Keys.S)) granny.y -= grannyYSpeed * Gdx.graphics.getDeltaTime
     if(Gdx.input.isKeyPressed(Keys.W)) granny.y += grannyYSpeed * Gdx.graphics.getDeltaTime
-    if(!fryingPanAttacking && Gdx.input.isKeyPressed(Keys.SPACE)) fryingPanAttacking = true
+    if(!isDefending && !isAttacking && Gdx.input.isKeyPressed(Keys.SPACE)) isAttacking = true
 
     // Stay within limits
     if(granny.x < 0) granny.x = 0

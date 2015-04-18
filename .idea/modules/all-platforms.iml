@@ -21,5 +21,15 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="SBT: com.badlogicgames.gdx:gdx:1.4.1:jar" level="project" />
     <orderEntry type="library" name="SBT: org.scala-lang:scala-library:2.11.2:jar" level="project" />
+    <orderEntry type="module-library">
+      <library name="SBT: unmanaged-jars">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../lib/tween-engine-api-sources.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../lib/tween-engine-api.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>
