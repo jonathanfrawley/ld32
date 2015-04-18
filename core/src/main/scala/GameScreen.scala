@@ -42,7 +42,21 @@ class Iron(var lookingRight:Boolean) {
   }
 }
 
-class GameScreen (game: LudumDareSkeleton) extends Screen {
+class Minion(val granny:Rectangle, val texture: Texture) {
+  val rect = new Rectangle()
+  rect.width = 30
+  rect.height = 60
+
+  def update(gameScreen: GameScreen): Unit = {
+    rect.x += 1.0f
+  }
+
+  def render(gameScreen: GameScreen): Unit = {
+    gameScreen.game.batch.draw(texture, rect.x, rect.y, rect.width, rect.height, 0, 0, texture.getWidth, texture.getHeight, (rect.x < granny.x), false)
+  }
+}
+
+class GameScreen (val game: LudumDareSkeleton) extends Screen {
 
   object WeaponType extends Enumeration {
     type WeaponType = Value
@@ -128,6 +142,22 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
   background1.height = gameHeight
   background2.width = gameWidth
   background2.height = gameHeight
+
+  //Bad guys... boo hiss
+  lazy val thanatosImage = new Texture(Gdx.files.internal("thanatos.png"))
+  lazy val minionImage = new Texture(Gdx.files.internal("minion.png"))
+  var minions = new ArrayBuffer[Minion]()
+  lazy val thanatos = new Rectangle()
+  thanatos.x = 500
+  thanatos.y = gameHeight * 0.33f
+  thanatos.width = 50
+  thanatos.height = 100
+
+  Timer.schedule(new Task {
+    override def run(): Unit = {
+      spawnMinion()
+    }
+  }, 1.0f)
 
   //spawnRaindrop()
 
@@ -253,6 +283,7 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
     fryingPanUpdate
     ironUpdate
     ironingBoardUpdate
+    minions.foreach { case minion => minion.update(this) }
 
     game.batch.setProjectionMatrix(camera.combined)
     game.batch.begin()
@@ -270,6 +301,10 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
     }
 
     irons.foreach { case iron => game.batch.draw(ironImage, iron.rect.x, iron.rect.y, iron.rect.width / 2, iron.rect.height / 2, iron.rect.width, iron.rect.height, 1.0f, 1.0f, iron.rot, 0, 0, ironImage.getWidth, ironImage.getHeight, iron.lookingRight, false) }
+    minions.foreach { case minion => minion.render(this) }
+
+    game.batch.draw(thanatosImage, thanatos.x, thanatos.y, thanatos.width, thanatos.height)
+
     game.batch.end()
 
     //Handle input
@@ -373,6 +408,17 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
     raindrops += raindrop
     lastDropTime = TimeUtils.nanoTime()
     */
+  }
+
+  def spawnMinion() {
+    val minion = new Minion(granny, minionImage)
+    minions += minion
+
+    Timer.schedule(new Task {
+      override def run(): Unit = {
+        spawnMinion()
+      }
+    }, 1.0f)
   }
 
   override def resize(width: Int, height: Int): Unit = {}
