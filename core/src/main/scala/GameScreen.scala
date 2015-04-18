@@ -80,7 +80,9 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
   var isDefending = false
   lazy val ironingBoard = new Rectangle()
 
-  lazy val background = new Rectangle()
+  lazy val background0 = new Rectangle()
+  lazy val background1 = new Rectangle()
+  lazy val background2 = new Rectangle()
 
   //var raindrops = new ArrayBuffer[Rectangle]()
   //var lastDropTime : Long = 0
@@ -120,8 +122,12 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
   ironingBoard.width = 20
   ironingBoard.height = 80
 
-  background.width = gameWidth
-  background.height = gameHeight
+  background0.width = gameWidth
+  background0.height = gameHeight
+  background1.width = gameWidth
+  background1.height = gameHeight
+  background2.width = gameWidth
+  background2.height = gameHeight
 
   //spawnRaindrop()
 
@@ -232,13 +238,27 @@ class GameScreen (game: LudumDareSkeleton) extends Screen {
     camera.position.set(camera.position.x + diff, camera.position.y, 0)
     camera.update()
 
+    //Infinite scrolling logic
+    if(!background1.overlaps(granny)) {
+      if(granny.x > background1.x) {
+        background1.x += background1.width
+      } else {
+        background1.x -= background1.width
+      }
+    }
+
+    background0.x = background1.x - background1.width
+    background2.x = background1.x + background1.width
+
     fryingPanUpdate
     ironUpdate
     ironingBoardUpdate
 
     game.batch.setProjectionMatrix(camera.combined)
     game.batch.begin()
-    game.batch.draw(backgroundImage, background.x, background.y, background.width, background.height)
+    game.batch.draw(backgroundImage, background0.x, background0.y, background0.width, background0.height)
+    game.batch.draw(backgroundImage, background1.x, background1.y, background1.width, background1.height)
+    game.batch.draw(backgroundImage, background2.x, background2.y, background2.width, background2.height)
     //game.batch.draw(grannyImage, granny.x, granny.y)
     game.batch.draw(grannyImage, granny.x, granny.y, granny.width, granny.height)
     //game.batch.draw(fryingPanImage, fryingPan.x, fryingPan.y, fryingPan.width, fryingPan.height)
