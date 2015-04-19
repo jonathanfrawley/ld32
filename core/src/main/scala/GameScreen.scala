@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.{MathUtils, Rectangle, Vector3}
 import com.badlogic.gdx.utils.{Timer, TimeUtils}
 
 import scala.collection.mutable.ArrayBuffer
+import scala.util.Random
 
 class Question1InputListener(gameScreen: GameScreen) extends TextInputListener {
   override def input(text:String): Unit ={
@@ -124,6 +125,7 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
   val bullets = new ArrayBuffer[Bullet]()
   var health = 5
   var isDamaged = false
+  var canMove = false
 
   def hurt(gameScreen:GameScreen): Unit = {
     if(!isDamaged) {
@@ -137,12 +139,12 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
         override def run(): Unit = {
           isDamaged = false
         }
-      }, 0.6f)
+      }, 0.1f)
     }
   }
 
   def update(gameScreen: GameScreen): Unit = {
-    val ySpeed = 0.5f
+    val ySpeed = 0.2f
     val xSpeed = 0.9f
     val smallVal = 1.0f
     val smallValX = 50.0f
@@ -160,41 +162,50 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
       axeAttackRot = 0.0f
     } else {
       //On same x axis roughly so start moving towards
-      if(weaponType == Axe) {
-        if(granny.x - rect.x > smallValX) {
-          rect.x += xSpeed
+      if (weaponType == Axe) {
+        if (granny.x - rect.x > smallValX) {
+          if(canMove) {
+            rect.x += xSpeed
+          }
           axeAttackRot = 0.0f
-        } else if(granny.x - rect.x < -smallValX) {
-          rect.x -= xSpeed
+        } else if (granny.x - rect.x < -smallValX) {
+          if(canMove) {
+            rect.x -= xSpeed
+          }
           axeAttackRot = 0.0f
         } else {
-          if(! isAttacking && allowedToAttack) {
+          if (!isAttacking && allowedToAttack) {
             //Good to attack
+            println("ATTACKING")
             isAttacking = true
             allowedToAttack = false
+            canMove = false
+            Timer.schedule(new Task {
+              override def run(): Unit = {
+                allowedToAttack = true
+                //canMove = true
+              }
+            }, 6.0f)
           } else {
-            if(isAttacking) {
+            println("isAttacking " + isAttacking)
+            if (isAttacking) {
+              println("DOING ATTACK")
               if (facingRight) axeAttackRot -= axeAngVelocity
               else axeAttackRot += axeAngVelocity
               if ((axeAttackRot < -90.0f) || (axeAttackRot > 90.0f)) {
                 axeAttackRot = 0.0f
                 isAttacking = false
-                Timer.schedule(new Task {
-                  override def run(): Unit = {
-                    allowedToAttack = true
-                  }
-                }, 1.0f)
               }
             }
           }
         }
       } else {
-        if(granny.x - rect.x > smallValXGun) {
-          rect.x += xSpeed
-        } else if(granny.x - rect.x < -smallValXGun) {
-          rect.x -= xSpeed
+        if (granny.x - rect.x > smallValXGun) {
+          if(canMove) rect.x += xSpeed
+        } else if (granny.x - rect.x < -smallValXGun) {
+          if(canMove) rect.x -= xSpeed
         } else {
-          if(! isAttacking && allowedToAttack) {
+          if (!isAttacking && allowedToAttack) {
             //Good to attack
             isAttacking = true
             allowedToAttack = false
@@ -206,7 +217,7 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
                 allowedToAttack = true
                 isAttacking = false
               }
-            }, 1.0f)
+            }, 10.0f)
           }
         }
       }
@@ -253,8 +264,8 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
       gameScreen.game.batch.draw(axeTexture, axe.x, axe.y, axe.width * 0.5f, axe.height * 0.1f, axe.width, axe.height, 1.0f, 1.0f, axeRot + axeAttackRot, 0, 0, axeTexture.getWidth, axeTexture.getHeight, false, false)
       //gameScreen.game.batch.draw(axeTexture, axeHitBox.x, axeHitBox.y, axeHitBox.width * 0.5f, axeHitBox.height * 0.1f, axeHitBox.width, axeHitBox.height, 1.0f, 1.0f, 90.0f, 0, 0, axeTexture.getWidth, axeTexture.getHeight, false, false)
 
-      gameScreen.shapeRenderer.setColor(0, 1, 0, 1)
-      gameScreen.shapeRenderer.rect(axeHitBox.x, axeHitBox.y, axeHitBox.width, axeHitBox.height)
+      //gameScreen.shapeRenderer.setColor(0, 1, 0, 1)
+      //gameScreen.shapeRenderer.rect(axeHitBox.x, axeHitBox.y, axeHitBox.width, axeHitBox.height)
 
     } else {
       gameScreen.game.batch.draw(gunTexture, gun.x, gun.y, gun.height * 0.1f, gun.height / 2, gun.width, gun.height, 1.0f, 1.0f, 0, 0, 0, gunTexture.getWidth, gunTexture.getHeight, facingRight, false)
@@ -376,11 +387,16 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
   thanatos.height = 100
   var killedMinions = new ArrayBuffer[Minion]()
 
+  /*
   Timer.schedule(new Task {
     override def run(): Unit = {
-      spawnMinion()
+      spawnMinion(true)
     }
   }, 1.0f)
+  */
+
+  for(i <- 0 to 2) { spawnMinion(false) }
+  var spawnLevel = 0
 
   val shapeRenderer = new ShapeRenderer()
 
@@ -411,8 +427,8 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
 
   var grannyHit = false
 
-  val redStartX = 1000
-  val redEndX = 2000
+  val redStartX = 2000
+  val redEndX = 4000
   var bossReached = false
   var bossState = 0
 
@@ -468,7 +484,7 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
             isAttacking = false
             scheduled = false
           }
-        }, 1.0f)
+        }, 0.1f)
       } else {
         if (activeIron == null && !isAttacking) {
           activeIron = new Iron(lookingRight)
@@ -524,6 +540,14 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
     camera.position.set(camera.position.x + diff, camera.position.y, 0)
     camera.update()
 
+    if((granny.x > 1000) && spawnLevel < 1) {
+      spawnLevel = 1
+      for(i <- 0 to 5) spawnMinion(false)
+    } else if (granny.x > 2000 && spawnLevel < 2) {
+      spawnLevel = 2
+      for(i <- 0 to 10) spawnMinion(false)
+    }
+
     //Infinite scrolling logic
     if(!background1.overlaps(granny)) {
       if(granny.x > background1.x) {
@@ -541,6 +565,7 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
       ironUpdate
       ironingBoardUpdate
       minions.foreach { case minion => minion.update(this) }
+    } else {
     }
 
     //Collision detection
@@ -548,14 +573,16 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
     val killedIrons = new ArrayBuffer[Iron]()
     minions.foreach { case minion =>
       if(minion.weaponType == Axe) {
-        if(math.abs(minion.axeAttackRot) > 45.0f && minion.axeHitBox.overlaps(grannyHitBox)) {
+        if(!isDefending && math.abs(minion.axeAttackRot) > 45.0f && minion.axeHitBox.overlaps(grannyHitBox)) {
           println("Hit Granny" + TimeUtils.millis())
           hitGranny()
         }
       } else {
         val killedBullets = new ArrayBuffer[Bullet]()
         minion.bullets.foreach { case bullet =>
-          if(bullet.rect.overlaps(grannyHitBox)) {
+          if(isDefending && bullet.rect.overlaps(ironingBoard)) {
+            killedBullets += bullet
+          } else if(bullet.rect.overlaps(grannyHitBox)) {
             println("Hit Granny with bullet" + TimeUtils.millis())
             hitGranny()
             killedBullets += bullet
@@ -574,9 +601,10 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
           }
         }
       } else {
-        if ((math.abs(fryingPanRot) < 45.0f) || (math.abs(fryingPanRot) > 135.0f) && fryingPanHitBox.overlaps(minion.rect)) {
+        if (((math.abs(fryingPanRot) < 45.0f) || (math.abs(fryingPanRot) > 135.0f)) && fryingPanHitBox.overlaps(minion.rect)) {
           println("Hit Minion with frying pan" + TimeUtils.millis())
-          minion.hurt(this)
+          //minion.hurt(this)
+          killedMinions += minion
         }
       }
     }
@@ -614,18 +642,18 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
       if(weaponType == Iron && activeIron != null) game.batch.draw(ironImage, activeIron.rect.x, activeIron.rect.y, activeIron.rect.width/2, activeIron.rect.height/2, activeIron.rect.width, activeIron.rect.height, 1.0f, 1.0f, activeIron.rot, 0, 0, ironImage.getWidth, ironImage.getHeight, lookingRight, false)
     }
 
-    shapeRenderer.rect(grannyHitBox.x, grannyHitBox.y, grannyHitBox.width, grannyHitBox.height)
-    shapeRenderer.rect(fryingPanHitBox.x, fryingPanHitBox.y, fryingPanHitBox.width, fryingPanHitBox.height)
+    //shapeRenderer.rect(grannyHitBox.x, grannyHitBox.y, grannyHitBox.width, grannyHitBox.height)
+    //shapeRenderer.rect(fryingPanHitBox.x, fryingPanHitBox.y, fryingPanHitBox.width, fryingPanHitBox.height)
 
     irons.foreach { case iron => game.batch.draw(ironImage, iron.rect.x, iron.rect.y, iron.rect.width / 2, iron.rect.height / 2, iron.rect.width, iron.rect.height, 1.0f, 1.0f, iron.rot, 0, 0, ironImage.getWidth, ironImage.getHeight, iron.lookingRight, false) }
-    //if(bossState < 24) {
-    //  game.batch.draw(thanatosImage, thanatos.x, thanatos.y, thanatos.width, thanatos.height)
-    //} else {
+    if((bossState < 24) && bossReached) {
+      game.batch.draw(thanatosImage, thanatos.x, thanatos.y, thanatos.width, thanatos.height)
+    } else if(bossReached && (bossState >= 24)){
       dionysus.x = thanatos.x
       dionysus.y = thanatos.y
       //Draw mittens or Dionysus or whatever.
       game.batch.draw(dionysusImage, dionysus.x, dionysus.y, dionysus.width, dionysus.height)
-    //}
+    }
 
     minions.foreach { case minion => minion.render(this) }
 
@@ -702,17 +730,17 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
       if(Gdx.input.isKeyPressed(Keys.D)) { granny.x += grannyXSpeed * Gdx.graphics.getDeltaTime; lookingRight = true }
       if(Gdx.input.isKeyPressed(Keys.S)) granny.y -= grannyYSpeed * Gdx.graphics.getDeltaTime
       if(Gdx.input.isKeyPressed(Keys.W)) granny.y += grannyYSpeed * Gdx.graphics.getDeltaTime
-      if(!isDefending && !isAttacking && Gdx.input.isKeyPressed(Keys.SPACE)) isAttacking = true
+      if(!isDefending && !isAttacking && Gdx.input.isKeyJustPressed(Keys.SPACE)) isAttacking = true
 
       // Stay within limits
       val limitPct = 0.75f
       if(granny.x < 0) granny.x = 0
-      //if(granny.x > gameWidth - granny.width) granny.x = gameWidth - granny.width
+      if(granny.x > (redEndX-granny.width)) granny.x = redEndX - granny.width
       if(granny.y < 0) granny.y = 0
       if(granny.y > (gameHeight * limitPct) - granny.height) granny.y = (gameHeight * limitPct) - granny.height
     }
 
-    if(granny.x > redEndX - gameWidth*0.5f) {
+    if((granny.x > redEndX - gameWidth*0.5f) && (minions.size == 0)) {
       bossReached = true
     }
 
@@ -795,16 +823,33 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
     */
   }
 
-  def spawnMinion() {
-    val minion = new Minion(granny, minionImage, axeImage, gunImage, bulletImage, Gun)
+  def spawnMinion(spawnMore:Boolean) {
+    val r = new Random().nextInt(2)
+    var minion : Minion = null
+    if(r==0) {
+      minion = new Minion(granny, minionImage, axeImage, gunImage, bulletImage, Axe)
+    } else {
+      minion = new Minion(granny, minionImage, axeImage, gunImage, bulletImage, Gun)
+    }
+    val r2 = new Random().nextInt(8)
+    //val r2 = 1
+    //var nearestSpawnPointX = (granny.x - gameWidth*0.6f)
+    //var nearestSpawnPointX = 0.0f
+    //if(r2 == 1) nearestSpawnPointX = (granny.x + gameWidth*0.6f)
+    var nearestSpawnPointX = (granny.x + gameWidth*(0.6f+(0.1f * r2)))
+    val nearestSpawnPointY = (new Random().nextInt(6)* 0.1f) *gameHeight
+    minion.rect.x = nearestSpawnPointX
+    minion.rect.y = nearestSpawnPointY
     //val minion = new Minion(granny, minionImage, axeImage, gunImage, bulletImage, Axe)
     minions += minion
 
-    Timer.schedule(new Task {
-      override def run(): Unit = {
-        spawnMinion()
-      }
-    }, 2.0f)
+    if(spawnMore) {
+      Timer.schedule(new Task {
+        override def run(): Unit = {
+          spawnMinion(true)
+        }
+      }, 1.0f)
+    }
   }
 
   override def resize(width: Int, height: Int): Unit = {}
