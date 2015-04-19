@@ -4,7 +4,7 @@ import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.graphics.{GL20, OrthographicCamera}
 import com.badlogic.gdx.{Gdx, Screen}
 
-class MainMenuScreen (game: LudumDareSkeleton) extends Screen {
+class GameOverScreen (game: LudumDareSkeleton) extends Screen {
   lazy val camera = new OrthographicCamera
   camera.setToOrtho(false, 800, 480)
 
@@ -15,8 +15,8 @@ class MainMenuScreen (game: LudumDareSkeleton) extends Screen {
     game.batch.setProjectionMatrix(camera.combined)
 
     game.batch.begin()
-    game.font.draw(game.batch, "", 100, 150)
-    game.font.draw(game.batch, "Press Enter to start", 100, 100)
+    game.font.draw(game.batch, "Game over", camera.viewportWidth/2, camera.viewportHeight/2)
+    game.font.draw(game.batch, "Press enter to retry", camera.viewportWidth/2, camera.viewportHeight/3)
     game.batch.end()
 
     if(Gdx.input.isKeyPressed(Keys.ENTER)) {

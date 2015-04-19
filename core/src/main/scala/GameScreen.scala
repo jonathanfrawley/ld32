@@ -98,7 +98,7 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
     if(!isDamaged) {
       isDamaged = true
       health -= 1
-      if (health < 0) {
+      if (health <= 0) {
         gameScreen.killedMinions += this
       }
 
@@ -247,6 +247,7 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
   */
   lazy val grannyImage = new Texture(Gdx.files.internal("granny.png"))
   lazy val fryingPanImage = new Texture(Gdx.files.internal("frying_pan.png"))
+  var health = 5
 
   lazy val ironImage = new Texture(Gdx.files.internal("iron.png"))
   lazy val ironingBoardImage = new Texture(Gdx.files.internal("ironing_board.png"))
@@ -458,6 +459,10 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
   def hitGranny(): Unit = {
     if(!grannyHit) {
       grannyHit = true
+      health -= 1
+      if(health <= 0) {
+        game.setScreen(new GameOverScreen(game))
+      }
       Timer.schedule(new Task {
         override def run(): Unit = {
           grannyHit = false
@@ -547,9 +552,11 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
     game.batch.draw(backgroundImage, background2.x, background2.y, background2.width, background2.height)
     //game.batch.draw(grannyImage, granny.x, granny.y)
     //debug
+    val smallHealth = 2
+    if(health <= smallHealth) game.batch.setColor(1.0f, 0.7f, 0.3f, 1.0f)
     if(grannyHit) game.batch.setColor(new Color(1.0f, 0.1f, 0.1f, 1.0f))
     game.batch.draw(grannyImage, granny.x, granny.y, granny.width, granny.height)
-    if(grannyHit) game.batch.setColor(Color.WHITE)
+    game.batch.setColor(Color.WHITE)
     //game.batch.draw(fryingPanImage, fryingPan.x, fryingPan.y, fryingPan.width, fryingPan.height)
     if(isDefending) {
       game.batch.draw(ironingBoardImage, ironingBoard.x, ironingBoard.y, ironingBoard.height/2, ironingBoard.height/2, ironingBoard.width, ironingBoard.height, 1.0f, 1.0f, 0, 0, 0, ironingBoardImage.getWidth, ironingBoardImage.getHeight, false, false)
