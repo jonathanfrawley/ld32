@@ -44,9 +44,9 @@ class StoryScreen (game: LudumDareSkeleton) extends Screen {
     if(state == 6) game.font.draw(game.batch, "He was the leader of a gang known as the Hellenists.", x, y)
     if(state == 7) game.font.draw(game.batch, "Ms. Yphus was determined to get her friend back.", x, y)
     if(state == 8) game.font.draw(game.batch, "She picked up anything she could find to use as a weapon and went to find Thanatos.", x, y)
-    if(state == 9) game.font.draw(game.batch, "She knew she had to use space to fire her active weapon.", x, y)
-    if(state == 10) game.font.draw(game.batch, "And that she could select her frying pan with 1 and her iron by pressing 2", x, y)
-    if(state == 11) game.font.draw(game.batch, "And that she could use her ironing board shield to block bullets by holding j", x, y)
+    if(state == 9) game.font.draw(game.batch, "She knew she had to use WASD to move and space to fire her active weapon.", x, y)
+    if(state == 10) game.font.draw(game.batch, "She could select her frying pan with 1 and her iron by pressing 2", x, y)
+    if(state == 11) game.font.draw(game.batch, "She could also use her ironing board shield to block bullets by holding j", x, y)
     if(state == 12) game.font.draw(game.batch, "She took a deep breath and went outside", x, y)
 
     game.font.draw(game.batch, "Press Enter to continue", 100, 30)

@@ -21,7 +21,7 @@ class GameOverScreen (game: LudumDareSkeleton) extends Screen {
     y -= 100
     game.font.draw(game.batch, "Instructions:", x, y)
     y -= 20
-    game.font.draw(game.batch, "Space to fire your active weapon.", x, y)
+    game.font.draw(game.batch, "WASD to move, space to fire your active weapon.", x, y)
     y -= 20
     game.font.draw(game.batch, "Select frying pan with 1 and iron by pressing 2", x, y)
     y -= 20

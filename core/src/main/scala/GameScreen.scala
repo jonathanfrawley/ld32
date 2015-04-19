@@ -365,8 +365,8 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
   ironingBoard.width = 20
   ironingBoard.height = 80
 
-  dionysus.width = 112
-  dionysus.height = 85
+  dionysus.width = 56
+  dionysus.height = 42
 
   background0.width = gameWidth
   background0.height = gameHeight
@@ -685,8 +685,8 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
       if(bossState == 22) game.font.draw(game.batch, "Thanatos: Very well, I will return your cat to you.", xStart, yStart)
       if(bossState == 23) game.font.draw(game.batch, "Thanatos: We shall meet again...", xStart, yStart)
       if(bossState == 24) game.font.draw(game.batch, "Dionysus: Mew!", xStart, yStart)
-      if(bossState == 25) game.font.draw(game.batch, "Ms. Yphus: Dionysus! You are back!",  xStartGran, yStartGran)
-      if(bossState == 26) game.font.draw(game.batch, "Ms. Yphus: I'll never let a god take you away from me again.",  xStartGran, yStartGran)
+      if(bossState == 25) game.font.draw(game.batch, "Ms. Yphus: Dionysus! You're back!",  xStartGran, yStartGran)
+      if(bossState == 26) game.font.draw(game.batch, "Ms. Yphus: I'll never let anyone take you away from me again.",  xStartGran, yStartGran)
       if(bossState == -1) { game.font.draw(game.batch, "Thanatos: Incorrect. I will ask again.", xStart, yStart); }
       game.font.draw(game.batch, "Press Enter to continue", thanatos.x - gameWidth*0.25f, gameHeight*0.1f)
       if(Gdx.input.isKeyJustPressed(Keys.ENTER)) {
