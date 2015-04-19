@@ -1,5 +1,7 @@
 package ludumdare32
 import com.badlogic.gdx.Input.Keys
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
 import com.badlogic.gdx.utils.Timer.Task
 
 import com.badlogic.gdx.{Gdx, Screen}
@@ -74,8 +76,12 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
   rect.width = 30
   rect.height = 60
   val axe = new Rectangle()
+  val axeHitBox = new Rectangle()
   axe.width = 10
   axe.height = 40
+
+  axeHitBox.width = axe.height
+  axeHitBox.height = axe.width
   var axeRot = 0.0f
   var axeAttackRot = 0.0f
   val gun = new Rectangle()
@@ -172,6 +178,13 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
         gun.x = rect.x - rect.width * 0.55f
       }
     }
+
+    axeHitBox.y = rect.y + rect.width*0.6f
+    if(facingRight) {
+      axeHitBox.x = rect.x + rect.width * 0.9f
+    } else {
+      axeHitBox.x = rect.x - rect.width * 0.9f
+    }
   }
 
   def spawnBullet() {
@@ -185,6 +198,11 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
     gameScreen.game.batch.draw(texture, rect.x, rect.y, rect.width, rect.height, 0, 0, texture.getWidth, texture.getHeight, facingRight, false)
     if(weaponType == Axe) {
       gameScreen.game.batch.draw(axeTexture, axe.x, axe.y, axe.width * 0.5f, axe.height * 0.1f, axe.width, axe.height, 1.0f, 1.0f, axeRot + axeAttackRot, 0, 0, axeTexture.getWidth, axeTexture.getHeight, false, false)
+      //gameScreen.game.batch.draw(axeTexture, axeHitBox.x, axeHitBox.y, axeHitBox.width * 0.5f, axeHitBox.height * 0.1f, axeHitBox.width, axeHitBox.height, 1.0f, 1.0f, 90.0f, 0, 0, axeTexture.getWidth, axeTexture.getHeight, false, false)
+
+      gameScreen.shapeRenderer.setColor(0, 1, 0, 1)
+      gameScreen.shapeRenderer.rect(axeHitBox.x, axeHitBox.y, axeHitBox.width, axeHitBox.height)
+
     } else {
       gameScreen.game.batch.draw(gunTexture, gun.x, gun.y, gun.height * 0.1f, gun.height / 2, gun.width, gun.height, 1.0f, 1.0f, 0, 0, 0, gunTexture.getWidth, gunTexture.getHeight, facingRight, false)
     }
@@ -217,10 +235,12 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
   lazy val game.batch = new SpriteBatch()
   //lazy var granny = new Sprite(grannyImage)
   lazy val granny = new Rectangle()
+  lazy val grannyHitBox = new Rectangle()
   //Weapons
   var weaponType = FryingPan
   var isAttacking = false
   lazy val fryingPan = new Rectangle()
+  lazy val fryingPanHitBox = new Rectangle()
   var fryingPanRot = 90.0f
   //lazy val activeIron = new Rectangle()
   //var activeIronRot = 0.0f
@@ -266,8 +286,14 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
   granny.x = gameWidth / 2 - granny.width / 2
   granny.y = 20
 
+  grannyHitBox.width = granny.width * 0.8f
+  grannyHitBox.height = granny.height * 0.8f
+
+
   fryingPan.width = 32
   fryingPan.height = 16
+  fryingPanHitBox.width = fryingPan.width
+  fryingPanHitBox.height = fryingPan.height
 
   ironingBoard.width = 20
   ironingBoard.height = 80
@@ -298,6 +324,8 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
     }
   }, 1.0f)
 
+  val shapeRenderer = new ShapeRenderer()
+
   //spawnRaindrop()
 
   /*
@@ -322,6 +350,8 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
   font = new BitmapFont()
   font.setColor(Color.RED)
   var scheduled = false
+
+  var grannyHit = false
 
   def fryingPanUpdate(): Unit = {
     if(weaponType == FryingPan) {
@@ -350,6 +380,12 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
         } else {
           fryingPanRot = 90.0f
         }
+      }
+      fryingPanHitBox.y = fryingPan.y
+      if(lookingRight) {
+        fryingPanHitBox.x = fryingPan.x
+      } else {
+        fryingPanHitBox.x = fryingPan.x - fryingPan.width
       }
     }
   }
@@ -396,6 +432,17 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
     }
   }
 
+  def hitGranny(): Unit = {
+    if(!grannyHit) {
+      grannyHit = true
+      Timer.schedule(new Task {
+        override def run(): Unit = {
+          grannyHit = false
+        }
+      }, 0.3f)
+    }
+  }
+
   override def render(delta:Float) {
     Gdx.gl.glClearColor(0, 0, 0.2f, 1)
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
@@ -424,13 +471,62 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
     ironingBoardUpdate
     minions.foreach { case minion => minion.update(this) }
 
+    //Collision detection
+    val killedMinions = new ArrayBuffer[Minion]()
+    val killedIrons = new ArrayBuffer[Iron]()
+    minions.foreach { case minion =>
+      if(minion.weaponType == Axe) {
+        if(math.abs(minion.axeAttackRot) > 45.0f && minion.axeHitBox.overlaps(grannyHitBox)) {
+          println("Hit Granny" + TimeUtils.millis())
+          hitGranny()
+        }
+      } else {
+        val killedBullets = new ArrayBuffer[Bullet]()
+        minion.bullets.foreach { case bullet =>
+          if(bullet.rect.overlaps(grannyHitBox)) {
+            println("Hit Granny with bullet" + TimeUtils.millis())
+            hitGranny()
+            killedBullets += bullet
+          }
+        }
+        killedBullets.foreach {
+          case bullet => minion.bullets -= bullet
+        }
+      }
+      if(weaponType == Iron) {
+        irons.foreach { case iron =>
+          if (iron.rect.overlaps(minion.rect)) {
+            println("Hit Minion with iron" + TimeUtils.millis())
+            killedMinions += minion
+            killedIrons += iron
+          }
+        }
+      } else {
+        if ((math.abs(fryingPanRot) < 45.0f) || (math.abs(fryingPanRot) > 135.0f) && fryingPanHitBox.overlaps(minion.rect)) {
+          println("Hit Minion with frying pan" + TimeUtils.millis())
+          killedMinions += minion
+        }
+      }
+    }
+    killedIrons.foreach {
+      case iron => irons -= iron
+    }
+    killedMinions.foreach {
+      case minion => minions -= minion
+    }
+
     game.batch.setProjectionMatrix(camera.combined)
+    shapeRenderer.setProjectionMatrix(camera.combined);
+    shapeRenderer.begin(ShapeType.Filled)
     game.batch.begin()
     game.batch.draw(backgroundImage, background0.x, background0.y, background0.width, background0.height)
     game.batch.draw(backgroundImage, background1.x, background1.y, background1.width, background1.height)
     game.batch.draw(backgroundImage, background2.x, background2.y, background2.width, background2.height)
     //game.batch.draw(grannyImage, granny.x, granny.y)
+    //debug
+    if(grannyHit) game.batch.setColor(new Color(1.0f, 0.1f, 0.1f, 1.0f))
     game.batch.draw(grannyImage, granny.x, granny.y, granny.width, granny.height)
+    if(grannyHit) game.batch.setColor(Color.WHITE)
     //game.batch.draw(fryingPanImage, fryingPan.x, fryingPan.y, fryingPan.width, fryingPan.height)
     if(isDefending) {
       game.batch.draw(ironingBoardImage, ironingBoard.x, ironingBoard.y, ironingBoard.height/2, ironingBoard.height/2, ironingBoard.width, ironingBoard.height, 1.0f, 1.0f, 0, 0, 0, ironingBoardImage.getWidth, ironingBoardImage.getHeight, false, false)
@@ -439,12 +535,16 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
       if(weaponType == Iron && activeIron != null) game.batch.draw(ironImage, activeIron.rect.x, activeIron.rect.y, activeIron.rect.width/2, activeIron.rect.height/2, activeIron.rect.width, activeIron.rect.height, 1.0f, 1.0f, activeIron.rot, 0, 0, ironImage.getWidth, ironImage.getHeight, lookingRight, false)
     }
 
+    shapeRenderer.rect(grannyHitBox.x, grannyHitBox.y, grannyHitBox.width, grannyHitBox.height)
+    shapeRenderer.rect(fryingPanHitBox.x, fryingPanHitBox.y, fryingPanHitBox.width, fryingPanHitBox.height)
+
     irons.foreach { case iron => game.batch.draw(ironImage, iron.rect.x, iron.rect.y, iron.rect.width / 2, iron.rect.height / 2, iron.rect.width, iron.rect.height, 1.0f, 1.0f, iron.rot, 0, 0, ironImage.getWidth, ironImage.getHeight, iron.lookingRight, false) }
+    game.batch.draw(thanatosImage, thanatos.x, thanatos.y, thanatos.width, thanatos.height)
     minions.foreach { case minion => minion.render(this) }
 
-    game.batch.draw(thanatosImage, thanatos.x, thanatos.y, thanatos.width, thanatos.height)
 
     game.batch.end()
+    shapeRenderer.end()
 
     //Handle input
     if(Gdx.input.isKeyPressed(Keys.NUM_1)) weaponType = FryingPan
@@ -472,6 +572,9 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
     //if(granny.x > gameWidth - granny.width) granny.x = gameWidth - granny.width
     if(granny.y < 0) granny.y = 0
     if(granny.y > (gameHeight * limitPct) - granny.height) granny.y = (gameHeight * limitPct) - granny.height
+
+    grannyHitBox.x = granny.x + granny.width * 0.1f
+    grannyHitBox.y = granny.y + granny.height * 0.1f
 
     //background.x = 300 - granny.x;
 
@@ -558,7 +661,7 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
       override def run(): Unit = {
         spawnMinion()
       }
-    }, 10.0f)
+    }, 2.0f)
   }
 
   override def resize(width: Int, height: Int): Unit = {}
