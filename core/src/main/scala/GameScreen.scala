@@ -91,6 +91,24 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
   var allowedToAttack = true
   val axeAngVelocity = 5.0f
   val bullets = new ArrayBuffer[Bullet]()
+  var health = 5
+  var isDamaged = false
+
+  def hurt(gameScreen:GameScreen): Unit = {
+    if(!isDamaged) {
+      isDamaged = true
+      health -= 1
+      if (health < 0) {
+        gameScreen.killedMinions += this
+      }
+
+      Timer.schedule(new Task {
+        override def run(): Unit = {
+          isDamaged = false
+        }
+      }, 0.6f)
+    }
+  }
 
   def update(gameScreen: GameScreen): Unit = {
     val ySpeed = 0.5f
@@ -195,7 +213,11 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
   def facingRight(): Boolean = (rect.x < granny.x)
 
   def render(gameScreen: GameScreen): Unit = {
+    val smallHealth = 2
+    if(health <= smallHealth) gameScreen.game.batch.setColor(1.0f, 0.7f, 0.3f, 1.0f)
+    if(isDamaged) gameScreen.game.batch.setColor(1.0f, 0.1f, 0.1f, 1.0f)
     gameScreen.game.batch.draw(texture, rect.x, rect.y, rect.width, rect.height, 0, 0, texture.getWidth, texture.getHeight, facingRight, false)
+    gameScreen.game.batch.setColor(Color.WHITE)
     if(weaponType == Axe) {
       gameScreen.game.batch.draw(axeTexture, axe.x, axe.y, axe.width * 0.5f, axe.height * 0.1f, axe.width, axe.height, 1.0f, 1.0f, axeRot + axeAttackRot, 0, 0, axeTexture.getWidth, axeTexture.getHeight, false, false)
       //gameScreen.game.batch.draw(axeTexture, axeHitBox.x, axeHitBox.y, axeHitBox.width * 0.5f, axeHitBox.height * 0.1f, axeHitBox.width, axeHitBox.height, 1.0f, 1.0f, 90.0f, 0, 0, axeTexture.getWidth, axeTexture.getHeight, false, false)
@@ -317,6 +339,7 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
   thanatos.y = gameHeight * 0.33f
   thanatos.width = 50
   thanatos.height = 100
+  var killedMinions = new ArrayBuffer[Minion]()
 
   Timer.schedule(new Task {
     override def run(): Unit = {
@@ -439,7 +462,7 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
         override def run(): Unit = {
           grannyHit = false
         }
-      }, 0.3f)
+      }, 0.6f)
     }
   }
 
@@ -472,7 +495,7 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
     minions.foreach { case minion => minion.update(this) }
 
     //Collision detection
-    val killedMinions = new ArrayBuffer[Minion]()
+    killedMinions = new ArrayBuffer[Minion]()
     val killedIrons = new ArrayBuffer[Iron]()
     minions.foreach { case minion =>
       if(minion.weaponType == Axe) {
@@ -497,14 +520,14 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
         irons.foreach { case iron =>
           if (iron.rect.overlaps(minion.rect)) {
             println("Hit Minion with iron" + TimeUtils.millis())
-            killedMinions += minion
             killedIrons += iron
+            minion.hurt(this)
           }
         }
       } else {
         if ((math.abs(fryingPanRot) < 45.0f) || (math.abs(fryingPanRot) > 135.0f) && fryingPanHitBox.overlaps(minion.rect)) {
           println("Hit Minion with frying pan" + TimeUtils.millis())
-          killedMinions += minion
+          minion.hurt(this)
         }
       }
     }
