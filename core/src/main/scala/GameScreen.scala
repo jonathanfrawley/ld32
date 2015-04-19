@@ -547,9 +547,16 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
     shapeRenderer.setProjectionMatrix(camera.combined);
     shapeRenderer.begin(ShapeType.Filled)
     game.batch.begin()
+    val startX = 1000
+    val endX = 5000
+    if(granny.x > startX) {
+      val progress = 1.0f - ((endX - granny.x) / (endX-startX))
+      game.batch.setColor(1.0f, 1.0f - progress, 1.0f - progress, 1.0f)
+    }
     game.batch.draw(backgroundImage, background0.x, background0.y, background0.width, background0.height)
     game.batch.draw(backgroundImage, background1.x, background1.y, background1.width, background1.height)
     game.batch.draw(backgroundImage, background2.x, background2.y, background2.width, background2.height)
+    game.batch.setColor(Color.WHITE)
     //game.batch.draw(grannyImage, granny.x, granny.y)
     //debug
     val smallHealth = 2
