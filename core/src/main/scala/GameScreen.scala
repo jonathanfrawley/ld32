@@ -10,6 +10,12 @@ import com.badlogic.gdx.utils.{Timer, TimeUtils}
 
 import scala.collection.mutable.ArrayBuffer
 
+object EnemyWeaponType extends Enumeration {
+  type EnemyWeaponType = Value
+  val Axe, Gun = Value
+}
+import EnemyWeaponType._
+
 class Iron(var lookingRight:Boolean) {
   var rot = 0.0f
   val rect = new Rectangle()
@@ -42,17 +48,32 @@ class Iron(var lookingRight:Boolean) {
   }
 }
 
-class Minion(val granny:Rectangle, val texture: Texture) {
+class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture, val gunTexture: Texture, val bulletTexture: Texture, val weaponType:EnemyWeaponType) {
   val rect = new Rectangle()
   rect.width = 30
   rect.height = 60
+  val axe = new Rectangle()
+  axe.width = 10
+  axe.height = 40
+  val axeRot = 0
 
   def update(gameScreen: GameScreen): Unit = {
     rect.x += 1.0f
+    axe.y = rect.y + rect.height * 0.6f
+    if(facingRight) {
+      axe.x = rect.x + rect.width * 0.75f
+    } else {
+      axe.x = rect.x - rect.width * 0.1f
+    }
   }
 
+  def facingRight(): Boolean = (rect.x < granny.x)
+
   def render(gameScreen: GameScreen): Unit = {
-    gameScreen.game.batch.draw(texture, rect.x, rect.y, rect.width, rect.height, 0, 0, texture.getWidth, texture.getHeight, (rect.x < granny.x), false)
+    gameScreen.game.batch.draw(texture, rect.x, rect.y, rect.width, rect.height, 0, 0, texture.getWidth, texture.getHeight, facingRight, false)
+    if(weaponType == Axe) {
+      gameScreen.game.batch.draw(axeTexture, axe.x, axe.y, axe.height * 0.1f, axe.height / 2, axe.width, axe.height, 1.0f, 1.0f, axeRot, 0, 0, axeTexture.getWidth, axeTexture.getHeight, false, false)
+    }
   }
 }
 
@@ -146,6 +167,9 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
   //Bad guys... boo hiss
   lazy val thanatosImage = new Texture(Gdx.files.internal("thanatos.png"))
   lazy val minionImage = new Texture(Gdx.files.internal("minion.png"))
+  lazy val gunImage = new Texture(Gdx.files.internal("gun.png"))
+  lazy val bulletImage = new Texture(Gdx.files.internal("bullet.png"))
+  lazy val axeImage = new Texture(Gdx.files.internal("axe.png"))
   var minions = new ArrayBuffer[Minion]()
   lazy val thanatos = new Rectangle()
   thanatos.x = 500
@@ -411,7 +435,7 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
   }
 
   def spawnMinion() {
-    val minion = new Minion(granny, minionImage)
+    val minion = new Minion(granny, minionImage, axeImage, gunImage, bulletImage, Axe)
     minions += minion
 
     Timer.schedule(new Task {
