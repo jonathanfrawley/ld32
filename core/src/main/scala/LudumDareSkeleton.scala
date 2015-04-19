@@ -10,6 +10,8 @@ class LudumDareSkeleton extends Game {
   override def create() {
     //setScreen(new MainMenuScreen(this))
     setScreen(new GameScreen(this))
+    //setScreen(new CreditsScreen(this))
+    //setScreen(new StoryScreen(this))
   }
 
   override def render() {

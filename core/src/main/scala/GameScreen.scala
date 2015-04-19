@@ -1,5 +1,5 @@
 package ludumdare32
-import com.badlogic.gdx.Input.Keys
+import com.badlogic.gdx.Input.{TextInputListener, Keys}
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
 import com.badlogic.gdx.utils.Timer.Task
@@ -11,6 +11,37 @@ import com.badlogic.gdx.math.{MathUtils, Rectangle, Vector3}
 import com.badlogic.gdx.utils.{Timer, TimeUtils}
 
 import scala.collection.mutable.ArrayBuffer
+
+class Question1InputListener(gameScreen: GameScreen) extends TextInputListener {
+  override def input(text:String): Unit ={
+    gameScreen.bossState += 1
+  }
+
+  override def canceled(): Unit ={
+    gameScreen.bossState -= 1
+  }
+}
+
+class Question2InputListener(gameScreen: GameScreen) extends TextInputListener {
+  override def input(text:String): Unit ={
+    gameScreen.bossState += 1
+  }
+
+  override def canceled(): Unit ={
+    gameScreen.bossState -= 1
+  }
+}
+
+class Question3InputListener(gameScreen: GameScreen) extends TextInputListener {
+  override def input(text:String): Unit ={
+    if(text.equalsIgnoreCase("3") || text.equalsIgnoreCase("three")) gameScreen.bossState += 1
+    else gameScreen.bossState = -1
+  }
+
+  override def canceled(): Unit ={
+    gameScreen.bossState -= 1
+  }
+}
 
 object EnemyWeaponType extends Enumeration {
   type EnemyWeaponType = Value
@@ -245,6 +276,7 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
   lazy val rainMusic = Gdx.audio.newMusic(Gdx.files.internal("rain.mp3"))
   lazy val dropImage = new Texture(Gdx.files.internal("droplet.png"))
   */
+  lazy val dionysusImage = new Texture(Gdx.files.internal("dionysus.png"))
   lazy val grannyImage = new Texture(Gdx.files.internal("granny.png"))
   lazy val fryingPanImage = new Texture(Gdx.files.internal("frying_pan.png"))
   var health = 5
@@ -256,6 +288,7 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
 
   lazy val camera = new OrthographicCamera()
   lazy val game.batch = new SpriteBatch()
+  lazy val dionysus = new Rectangle()
   //lazy var granny = new Sprite(grannyImage)
   lazy val granny = new Rectangle()
   lazy val grannyHitBox = new Rectangle()
@@ -320,6 +353,9 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
 
   ironingBoard.width = 20
   ironingBoard.height = 80
+
+  dionysus.width = 112
+  dionysus.height = 85
 
   background0.width = gameWidth
   background0.height = gameHeight
@@ -582,20 +618,67 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
     shapeRenderer.rect(fryingPanHitBox.x, fryingPanHitBox.y, fryingPanHitBox.width, fryingPanHitBox.height)
 
     irons.foreach { case iron => game.batch.draw(ironImage, iron.rect.x, iron.rect.y, iron.rect.width / 2, iron.rect.height / 2, iron.rect.width, iron.rect.height, 1.0f, 1.0f, iron.rot, 0, 0, ironImage.getWidth, ironImage.getHeight, iron.lookingRight, false) }
-    game.batch.draw(thanatosImage, thanatos.x, thanatos.y, thanatos.width, thanatos.height)
+    //if(bossState < 24) {
+    //  game.batch.draw(thanatosImage, thanatos.x, thanatos.y, thanatos.width, thanatos.height)
+    //} else {
+      dionysus.x = thanatos.x
+      dionysus.y = thanatos.y
+      //Draw mittens or Dionysus or whatever.
+      game.batch.draw(dionysusImage, dionysus.x, dionysus.y, dionysus.width, dionysus.height)
+    //}
+
     minions.foreach { case minion => minion.render(this) }
 
     if(bossReached) {
       println("Boxx reached")
-      val xStart = thanatos.x- gameWidth * 0.25f
+      val xStart = thanatos.x- gameWidth * 0.75f
       val yStart = gameHeight*0.65f
-      if(bossState == 0) game.font.draw(game.batch, "Thanalos: You have done well to make it this far.", xStart, yStart)
-      if(bossState == 1) game.font.draw(game.batch, "Thanalos: Sister Yphus, ", xStart, yStart)
-      if(bossState == 2) game.font.draw(game.batch, "Thanalos: iowh, ", xStart, yStart)
+      val xStartGran = thanatos.x- gameWidth * 0.75f
+      val yStartGran = gameHeight*0.25f
+      if(bossState == 0) game.font.draw(game.batch, "Thanatos: You have done well to make it this far.", xStart, yStart)
+      if(bossState == 1) game.font.draw(game.batch, "Thanatos: Sister Yphus...", xStart, yStart)
+      if(bossState == 2) game.font.draw(game.batch, "Ms. Yphus: That's a name I've not heard in a long time", xStartGran, yStartGran)
+      if(bossState == 3) game.font.draw(game.batch, "Thanatos: And this is all for your cat", xStart, yStart)
+      if(bossState == 4) game.font.draw(game.batch, "Ms. Yphus: I would do anything for Dionysus", xStartGran, yStartGran)
+      if(bossState == 5) game.font.draw(game.batch, "Thanatos: ...", xStart, yStart)
+      if(bossState == 6) game.font.draw(game.batch, "Thanatos:  Your cat is called Dionysus?", xStart, yStart)
+      if(bossState == 7) game.font.draw(game.batch, "Ms. Yphus: Eh no, I meant Mittens.", xStartGran, yStartGran)
+      if(bossState == 8) game.font.draw(game.batch, "Thanatos: I see.", xStart, yStart)
+      if(bossState == 9) game.font.draw(game.batch, "Thanatos: I am impressed by you", xStart, yStart)
+      if(bossState == 10) game.font.draw(game.batch, "Thanatos: If you can answer me these questions three, I will return your cat to thee.", xStart, yStart)
+      if(bossState == 11) game.font.draw(game.batch, "Thanatos: Question 1: What is your favourite colour?", xStart, yStart)
+      if(bossState == 13) game.font.draw(game.batch, "Thanatos: That is quite possibly correct. I cannot read minds.", xStart, yStart)
+      if(bossState == 14) game.font.draw(game.batch, "Thanatos: Question 2: What is your quest?", xStart, yStart)
+      if(bossState == 16) game.font.draw(game.batch, "Thanatos: Sure why not.", xStart, yStart)
+      if(bossState == 17) game.font.draw(game.batch, "Thanatos: Final Question:", xStart, yStart)
+      if(bossState == 18) game.font.draw(game.batch, "Thanatos: Vanessa has twelve black socks and twelve white socks in her drawer.", xStart, yStart)
+      if(bossState == 19) game.font.draw(game.batch, "Thanatos: Without looking, how many socks must she take from the drawer in order to be sure to get a pair that match?", xStart, yStart)
+      if(bossState == 21) game.font.draw(game.batch, "Thanatos: 3 is correct", xStart, yStart)
+      if(bossState == 22) game.font.draw(game.batch, "Thanatos: Very well, I will return your cat to you.", xStart, yStart)
+      if(bossState == 23) game.font.draw(game.batch, "Thanatos: We shall meet again...", xStart, yStart)
+      if(bossState == 24) game.font.draw(game.batch, "Dionysus: Mew!", xStart, yStart)
+      if(bossState == 25) game.font.draw(game.batch, "Ms. Yphus: Dionysus! You are back!",  xStartGran, yStartGran)
+      if(bossState == 26) game.font.draw(game.batch, "Ms. Yphus: I'll never let a god take you away from me again.",  xStartGran, yStartGran)
+      if(bossState == -1) { game.font.draw(game.batch, "Thanatos: Incorrect. I will ask again.", xStart, yStart); }
       game.font.draw(game.batch, "Press Enter to continue", thanatos.x - gameWidth*0.25f, gameHeight*0.1f)
-      if(Gdx.input.isKeyJustPressed(Keys.ENTER)) bossState += 1
+      if(Gdx.input.isKeyJustPressed(Keys.ENTER)) {
+        bossState += 1
+        if(bossState == 100) { bossState = 17; }
+        if(bossState == 27) { game.setScreen(new CreditsScreen(this.game)) }
+        if(bossState == 12) {
+          var listener = new Question1InputListener(this)
+          Gdx.input.getTextInput(listener, "What is your favourite colour?", "")
+        }
+        if(bossState == 15) {
+          var listener = new Question2InputListener(this)
+          Gdx.input.getTextInput(listener, "What is your quest?", "")
+        }
+        if(bossState == 20) {
+          var listener = new Question3InputListener(this)
+          Gdx.input.getTextInput(listener, "Vanessa has twelve black socks and twelve white socks in her drawer. Without looking, how many socks must she take from the drawer in order to be sure to get a pair that match?", "")
+        }
+      }
     }
-
 
     game.batch.end()
     shapeRenderer.end()

@@ -1,4 +1,3 @@
-
 package ludumdare32
 
 import com.badlogic.gdx.Input.Keys
@@ -6,7 +5,7 @@ import com.badlogic.gdx.graphics.Texture.TextureFilter
 import com.badlogic.gdx.graphics.{Texture, GL20, OrthographicCamera}
 import com.badlogic.gdx.{Gdx, Screen}
 
-class MainMenuScreen (game: LudumDareSkeleton) extends Screen {
+class CreditsScreen (game: LudumDareSkeleton) extends Screen {
   lazy val camera = new OrthographicCamera
   camera.setToOrtho(false, 800, 480)
   //lazy val backgroundImage = new Texture(Gdx.files.internal("credits.png"))
@@ -24,17 +23,21 @@ class MainMenuScreen (game: LudumDareSkeleton) extends Screen {
     var x = camera.viewportWidth*0.33f
     var y = 400
     game.font.draw(game.batch, "Thanatos and the cat god", x, y)
-    y -= 30
+    y -= 100
     game.font.draw(game.batch, "Made by Jonathan Frawley @df3n5", x, y)
-    y -= 200
-    game.batch.draw(dionysusImage, x, y, 112, 85)
-    y -= 30
-    game.font.draw(game.batch, "Press enter to start", x, y)
+    y -= 20
+    game.font.draw(game.batch, "Tools used: Scala, libgdx, inkscape, linux", x, y)
+    y -= 20
+    game.font.draw(game.batch, "Thanks for playing!", x, y)
+    y -= 100
+    game.font.draw(game.batch, "Press enter to replay", x, y)
 
+    game.batch.draw(grannyNiceImage, 50, 50, 83, 205)
+    game.batch.draw(dionysusImage, 30, 120, 112, 85)
     game.batch.end()
 
     if(Gdx.input.isKeyJustPressed(Keys.ENTER)) {
-      game.setScreen(new StoryScreen(game))
+      game.setScreen(new MainMenuScreen(game))
       dispose()
     }
   }
@@ -51,4 +54,3 @@ class MainMenuScreen (game: LudumDareSkeleton) extends Screen {
 
   override def resume(): Unit = {}
 }
-

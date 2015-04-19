@@ -9,17 +9,28 @@ class GameOverScreen (game: LudumDareSkeleton) extends Screen {
   camera.setToOrtho(false, 800, 480)
 
   override def render(delta: Float): Unit = {
-    Gdx.gl.glClearColor(0, 0, 0.2f, 1)
+    Gdx.gl.glClearColor(0, 0, 0, 1)
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
     camera.update()
     game.batch.setProjectionMatrix(camera.combined)
 
     game.batch.begin()
-    game.font.draw(game.batch, "Game over", camera.viewportWidth/2, camera.viewportHeight/2)
-    game.font.draw(game.batch, "Press enter to retry", camera.viewportWidth/2, camera.viewportHeight/3)
+    var x = camera.viewportWidth*0.33f
+    var y = 400
+    game.font.draw(game.batch, "Game over", x, y)
+    y -= 100
+    game.font.draw(game.batch, "Instructions:", x, y)
+    y -= 20
+    game.font.draw(game.batch, "Space to fire your active weapon.", x, y)
+    y -= 20
+    game.font.draw(game.batch, "Select frying pan with 1 and iron by pressing 2", x, y)
+    y -= 20
+    game.font.draw(game.batch, "Ironing board shield to block bullets by holding j", x, y)
+    y -= 100
+    game.font.draw(game.batch, "Press enter to retry", x, y)
     game.batch.end()
 
-    if(Gdx.input.isKeyPressed(Keys.ENTER)) {
+    if(Gdx.input.isKeyJustPressed(Keys.ENTER)) {
       game.setScreen(new GameScreen(game))
       dispose()
     }
