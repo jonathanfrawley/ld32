@@ -61,7 +61,25 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
   gun.height = 10
 
   def update(gameScreen: GameScreen): Unit = {
-    rect.x += 1.0f
+    val ySpeed = 0.5f
+    val xSpeed = 0.9f
+    val smallVal = 1.0f
+    //AI
+    if(granny.y - rect.y > smallVal) {
+      rect.y += ySpeed
+    } else if(granny.y - rect.y < -smallVal) {
+      rect.y -= ySpeed
+    } else {
+      //On same x axis roughly so start moving towards
+      if(weaponType == Axe) {
+        if(granny.x - rect.x > smallVal) {
+          rect.x += xSpeed
+        } else if(granny.x - rect.x < -smallVal) {
+          rect.x -= xSpeed
+        }
+      }
+    }
+
     if (weaponType == Axe) {
       axe.y = rect.y + rect.height * 0.6f
       if (facingRight) {
@@ -449,14 +467,15 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
   }
 
   def spawnMinion() {
-    val minion = new Minion(granny, minionImage, axeImage, gunImage, bulletImage, Gun)
+    //val minion = new Minion(granny, minionImage, axeImage, gunImage, bulletImage, Gun)
+    val minion = new Minion(granny, minionImage, axeImage, gunImage, bulletImage, Axe)
     minions += minion
 
     Timer.schedule(new Task {
       override def run(): Unit = {
         spawnMinion()
       }
-    }, 1.0f)
+    }, 10.0f)
   }
 
   override def resize(width: Int, height: Int): Unit = {}
