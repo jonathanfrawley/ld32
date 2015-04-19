@@ -56,14 +56,26 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
   axe.width = 10
   axe.height = 40
   val axeRot = 0
+  val gun = new Rectangle()
+  gun.width = 40
+  gun.height = 10
 
   def update(gameScreen: GameScreen): Unit = {
     rect.x += 1.0f
-    axe.y = rect.y + rect.height * 0.6f
-    if(facingRight) {
-      axe.x = rect.x + rect.width * 0.75f
+    if (weaponType == Axe) {
+      axe.y = rect.y + rect.height * 0.6f
+      if (facingRight) {
+        axe.x = rect.x + rect.width * 0.75f
+      } else {
+        axe.x = rect.x - rect.width * 0.1f
+      }
     } else {
-      axe.x = rect.x - rect.width * 0.1f
+      gun.y = rect.y + rect.height * 0.6f
+      if (facingRight) {
+        gun.x = rect.x + rect.width * 0.35f
+      } else {
+        gun.x = rect.x - rect.width * 0.55f
+      }
     }
   }
 
@@ -73,6 +85,8 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
     gameScreen.game.batch.draw(texture, rect.x, rect.y, rect.width, rect.height, 0, 0, texture.getWidth, texture.getHeight, facingRight, false)
     if(weaponType == Axe) {
       gameScreen.game.batch.draw(axeTexture, axe.x, axe.y, axe.height * 0.1f, axe.height / 2, axe.width, axe.height, 1.0f, 1.0f, axeRot, 0, 0, axeTexture.getWidth, axeTexture.getHeight, false, false)
+    } else {
+      gameScreen.game.batch.draw(gunTexture, gun.x, gun.y, gun.height * 0.1f, gun.height / 2, gun.width, gun.height, 1.0f, 1.0f, 0, 0, 0, gunTexture.getWidth, gunTexture.getHeight, facingRight, false)
     }
   }
 }
@@ -435,7 +449,7 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
   }
 
   def spawnMinion() {
-    val minion = new Minion(granny, minionImage, axeImage, gunImage, bulletImage, Axe)
+    val minion = new Minion(granny, minionImage, axeImage, gunImage, bulletImage, Gun)
     minions += minion
 
     Timer.schedule(new Task {
