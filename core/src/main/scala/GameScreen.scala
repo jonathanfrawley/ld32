@@ -336,8 +336,6 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
   lazy val axeImage = new Texture(Gdx.files.internal("axe.png"))
   var minions = new ArrayBuffer[Minion]()
   lazy val thanatos = new Rectangle()
-  thanatos.x = 500
-  thanatos.y = gameHeight * 0.33f
   thanatos.width = 50
   thanatos.height = 100
   var killedMinions = new ArrayBuffer[Minion]()
@@ -376,6 +374,14 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
   var scheduled = false
 
   var grannyHit = false
+
+  val redStartX = 1000
+  val redEndX = 2000
+  var bossReached = false
+  var bossState = 0
+
+  thanatos.x = redEndX - (gameWidth * 0.25f)
+  thanatos.y = gameHeight * 0.33f
 
   def fryingPanUpdate(): Unit = {
     if(weaponType == FryingPan) {
@@ -494,10 +500,12 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
     background0.x = background1.x - background1.width
     background2.x = background1.x + background1.width
 
-    fryingPanUpdate
-    ironUpdate
-    ironingBoardUpdate
-    minions.foreach { case minion => minion.update(this) }
+    if(!bossReached) {
+      fryingPanUpdate
+      ironUpdate
+      ironingBoardUpdate
+      minions.foreach { case minion => minion.update(this) }
+    }
 
     //Collision detection
     killedMinions = new ArrayBuffer[Minion]()
@@ -547,10 +555,8 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
     shapeRenderer.setProjectionMatrix(camera.combined);
     shapeRenderer.begin(ShapeType.Filled)
     game.batch.begin()
-    val startX = 1000
-    val endX = 5000
-    if(granny.x > startX) {
-      val progress = 1.0f - ((endX - granny.x) / (endX-startX))
+    if(granny.x > redStartX) {
+      val progress = 1.0f - ((redEndX - granny.x) / (redEndX-redStartX))
       game.batch.setColor(1.0f, 1.0f - progress, 1.0f - progress, 1.0f)
     }
     game.batch.draw(backgroundImage, background0.x, background0.y, background0.width, background0.height)
@@ -579,6 +585,17 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
     game.batch.draw(thanatosImage, thanatos.x, thanatos.y, thanatos.width, thanatos.height)
     minions.foreach { case minion => minion.render(this) }
 
+    if(bossReached) {
+      println("Boxx reached")
+      val xStart = thanatos.x- gameWidth * 0.25f
+      val yStart = gameHeight*0.65f
+      if(bossState == 0) game.font.draw(game.batch, "Thanalos: You have done well to make it this far.", xStart, yStart)
+      if(bossState == 1) game.font.draw(game.batch, "Thanalos: Sister Yphus, ", xStart, yStart)
+      if(bossState == 2) game.font.draw(game.batch, "Thanalos: iowh, ", xStart, yStart)
+      game.font.draw(game.batch, "Press Enter to continue", thanatos.x - gameWidth*0.25f, gameHeight*0.1f)
+      if(Gdx.input.isKeyJustPressed(Keys.ENTER)) bossState += 1
+    }
+
 
     game.batch.end()
     shapeRenderer.end()
@@ -597,18 +614,24 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
       */
     val grannyXSpeed = 300
     val grannyYSpeed = 200
-    if(Gdx.input.isKeyPressed(Keys.A)) { granny.x -= grannyXSpeed * Gdx.graphics.getDeltaTime; lookingRight = false }
-    if(Gdx.input.isKeyPressed(Keys.D)) { granny.x += grannyXSpeed * Gdx.graphics.getDeltaTime; lookingRight = true }
-    if(Gdx.input.isKeyPressed(Keys.S)) granny.y -= grannyYSpeed * Gdx.graphics.getDeltaTime
-    if(Gdx.input.isKeyPressed(Keys.W)) granny.y += grannyYSpeed * Gdx.graphics.getDeltaTime
-    if(!isDefending && !isAttacking && Gdx.input.isKeyPressed(Keys.SPACE)) isAttacking = true
+    if(!bossReached) {
+      if(Gdx.input.isKeyPressed(Keys.A)) { granny.x -= grannyXSpeed * Gdx.graphics.getDeltaTime; lookingRight = false }
+      if(Gdx.input.isKeyPressed(Keys.D)) { granny.x += grannyXSpeed * Gdx.graphics.getDeltaTime; lookingRight = true }
+      if(Gdx.input.isKeyPressed(Keys.S)) granny.y -= grannyYSpeed * Gdx.graphics.getDeltaTime
+      if(Gdx.input.isKeyPressed(Keys.W)) granny.y += grannyYSpeed * Gdx.graphics.getDeltaTime
+      if(!isDefending && !isAttacking && Gdx.input.isKeyPressed(Keys.SPACE)) isAttacking = true
 
-    // Stay within limits
-    val limitPct = 0.75f
-    if(granny.x < 0) granny.x = 0
-    //if(granny.x > gameWidth - granny.width) granny.x = gameWidth - granny.width
-    if(granny.y < 0) granny.y = 0
-    if(granny.y > (gameHeight * limitPct) - granny.height) granny.y = (gameHeight * limitPct) - granny.height
+      // Stay within limits
+      val limitPct = 0.75f
+      if(granny.x < 0) granny.x = 0
+      //if(granny.x > gameWidth - granny.width) granny.x = gameWidth - granny.width
+      if(granny.y < 0) granny.y = 0
+      if(granny.y > (gameHeight * limitPct) - granny.height) granny.y = (gameHeight * limitPct) - granny.height
+    }
+
+    if(granny.x > redEndX - gameWidth*0.5f) {
+      bossReached = true
+    }
 
     grannyHitBox.x = granny.x + granny.width * 0.1f
     grannyHitBox.y = granny.y + granny.height * 0.1f
