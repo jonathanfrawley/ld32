@@ -48,6 +48,27 @@ class Iron(var lookingRight:Boolean) {
   }
 }
 
+class Bullet(var lookingRight:Boolean, firerRect: Rectangle) {
+  val rect = new Rectangle()
+  rect.width = 3
+  rect.height = 3
+  rect.y = firerRect.y + 0.67f*firerRect.height
+  if(lookingRight) {
+    rect.x = firerRect.x + 1.7f*firerRect.width
+  } else {
+    rect.x = firerRect.x - 0.7f*firerRect.width
+  }
+
+  def update(): Unit = {
+    val bulletSpeed = 9.0f
+    if(lookingRight) {
+      rect.x += bulletSpeed
+    } else {
+      rect.x -= bulletSpeed
+    }
+  }
+}
+
 class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture, val gunTexture: Texture, val bulletTexture: Texture, val weaponType:EnemyWeaponType) {
   val rect = new Rectangle()
   rect.width = 30
@@ -63,12 +84,18 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
   var isAttacking = false
   var allowedToAttack = true
   val axeAngVelocity = 5.0f
+  val bullets = new ArrayBuffer[Bullet]()
 
   def update(gameScreen: GameScreen): Unit = {
     val ySpeed = 0.5f
     val xSpeed = 0.9f
     val smallVal = 1.0f
     val smallValX = 50.0f
+    val smallValXGun = gameScreen.gameWidth * 0.4f
+    bullets.foreach { case bullet => {
+      bullet.update()
+    }
+    }
     //AI
     if(granny.y - rect.y > smallVal) {
       rect.y += ySpeed
@@ -106,6 +133,27 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
             }
           }
         }
+      } else {
+        if(granny.x - rect.x > smallValXGun) {
+          rect.x += xSpeed
+        } else if(granny.x - rect.x < -smallValXGun) {
+          rect.x -= xSpeed
+        } else {
+          if(! isAttacking && allowedToAttack) {
+            //Good to attack
+            isAttacking = true
+            allowedToAttack = false
+            //Spawn bullet
+            spawnBullet()
+
+            Timer.schedule(new Task {
+              override def run(): Unit = {
+                allowedToAttack = true
+                isAttacking = false
+              }
+            }, 1.0f)
+          }
+        }
       }
     }
 
@@ -126,6 +174,11 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
     }
   }
 
+  def spawnBullet() {
+    val bullet = new Bullet(facingRight, rect)
+    bullets += bullet
+  }
+
   def facingRight(): Boolean = (rect.x < granny.x)
 
   def render(gameScreen: GameScreen): Unit = {
@@ -135,6 +188,7 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
     } else {
       gameScreen.game.batch.draw(gunTexture, gun.x, gun.y, gun.height * 0.1f, gun.height / 2, gun.width, gun.height, 1.0f, 1.0f, 0, 0, 0, gunTexture.getWidth, gunTexture.getHeight, facingRight, false)
     }
+    bullets.foreach { case bullet => gameScreen.game.batch.draw(bulletTexture, bullet.rect.x, bullet.rect.y, bullet.rect.width / 2, bullet.rect.height / 2, bullet.rect.width, bullet.rect.height, 1.0f, 1.0f, 0.0f, 0, 0, bulletTexture.getWidth, bulletTexture.getHeight, bullet.lookingRight, false) }
   }
 }
 
@@ -496,8 +550,8 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
   }
 
   def spawnMinion() {
-    //val minion = new Minion(granny, minionImage, axeImage, gunImage, bulletImage, Gun)
-    val minion = new Minion(granny, minionImage, axeImage, gunImage, bulletImage, Axe)
+    val minion = new Minion(granny, minionImage, axeImage, gunImage, bulletImage, Gun)
+    //val minion = new Minion(granny, minionImage, axeImage, gunImage, bulletImage, Axe)
     minions += minion
 
     Timer.schedule(new Task {
