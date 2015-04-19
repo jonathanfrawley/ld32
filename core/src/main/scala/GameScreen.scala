@@ -55,27 +55,56 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
   val axe = new Rectangle()
   axe.width = 10
   axe.height = 40
-  val axeRot = 0
+  var axeRot = 0.0f
+  var axeAttackRot = 0.0f
   val gun = new Rectangle()
   gun.width = 40
   gun.height = 10
+  var isAttacking = false
+  var allowedToAttack = true
+  val axeAngVelocity = 5.0f
 
   def update(gameScreen: GameScreen): Unit = {
     val ySpeed = 0.5f
     val xSpeed = 0.9f
     val smallVal = 1.0f
+    val smallValX = 50.0f
     //AI
     if(granny.y - rect.y > smallVal) {
       rect.y += ySpeed
+      axeAttackRot = 0.0f
     } else if(granny.y - rect.y < -smallVal) {
       rect.y -= ySpeed
+      axeAttackRot = 0.0f
     } else {
       //On same x axis roughly so start moving towards
       if(weaponType == Axe) {
-        if(granny.x - rect.x > smallVal) {
+        if(granny.x - rect.x > smallValX) {
           rect.x += xSpeed
-        } else if(granny.x - rect.x < -smallVal) {
+          axeAttackRot = 0.0f
+        } else if(granny.x - rect.x < -smallValX) {
           rect.x -= xSpeed
+          axeAttackRot = 0.0f
+        } else {
+          if(! isAttacking && allowedToAttack) {
+            //Good to attack
+            isAttacking = true
+            allowedToAttack = false
+          } else {
+            if(isAttacking) {
+              if (facingRight) axeAttackRot -= axeAngVelocity
+              else axeAttackRot += axeAngVelocity
+              if ((axeAttackRot < -90.0f) || (axeAttackRot > 90.0f)) {
+                axeAttackRot = 0.0f
+                isAttacking = false
+                Timer.schedule(new Task {
+                  override def run(): Unit = {
+                    allowedToAttack = true
+                  }
+                }, 1.0f)
+              }
+            }
+          }
         }
       }
     }
@@ -102,7 +131,7 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
   def render(gameScreen: GameScreen): Unit = {
     gameScreen.game.batch.draw(texture, rect.x, rect.y, rect.width, rect.height, 0, 0, texture.getWidth, texture.getHeight, facingRight, false)
     if(weaponType == Axe) {
-      gameScreen.game.batch.draw(axeTexture, axe.x, axe.y, axe.height * 0.1f, axe.height / 2, axe.width, axe.height, 1.0f, 1.0f, axeRot, 0, 0, axeTexture.getWidth, axeTexture.getHeight, false, false)
+      gameScreen.game.batch.draw(axeTexture, axe.x, axe.y, axe.width * 0.5f, axe.height * 0.1f, axe.width, axe.height, 1.0f, 1.0f, axeRot + axeAttackRot, 0, 0, axeTexture.getWidth, axeTexture.getHeight, false, false)
     } else {
       gameScreen.game.batch.draw(gunTexture, gun.x, gun.y, gun.height * 0.1f, gun.height / 2, gun.width, gun.height, 1.0f, 1.0f, 0, 0, 0, gunTexture.getWidth, gunTexture.getHeight, facingRight, false)
     }
