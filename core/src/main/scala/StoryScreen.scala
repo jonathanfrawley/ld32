@@ -10,10 +10,14 @@ class StoryScreen (game: LudumDareSkeleton) extends Screen {
   lazy val camera = new OrthographicCamera
   camera.setToOrtho(false, 800, 480)
   var state = 0
-
   lazy val dionysusImage = new Texture(Gdx.files.internal("dionysus.png"))
   lazy val grannyImage = new Texture(Gdx.files.internal("granny.png"))
   lazy val grannyNiceImage = new Texture(Gdx.files.internal("granny_happy.png"))
+
+  lazy val bgMusic = Gdx.audio.newMusic(Gdx.files.internal("bg_granny.wav"))
+  //lazy val bgMusic = Gdx.audio.newMusic(Gdx.files.internal("drop.wav"))
+  bgMusic.setLooping(true)
+  bgMusic.play()
 
   override def render(delta: Float): Unit = {
     Gdx.gl.glClearColor(0, 0, 0, 1)
@@ -65,7 +69,10 @@ class StoryScreen (game: LudumDareSkeleton) extends Screen {
 
   override def hide(): Unit = {}
 
-  override def dispose(): Unit = {}
+  override def dispose(): Unit = {
+    bgMusic.stop()
+    bgMusic.dispose()
+  }
 
   override def pause(): Unit = {}
 

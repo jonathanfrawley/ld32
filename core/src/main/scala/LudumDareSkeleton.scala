@@ -1,6 +1,6 @@
 package ludumdare32
 
-import com.badlogic.gdx.Game
+import com.badlogic.gdx.{Gdx, Game}
 import com.badlogic.gdx.graphics.g2d.{BitmapFont, SpriteBatch}
 
 class LudumDareSkeleton extends Game {

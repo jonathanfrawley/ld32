@@ -176,7 +176,6 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
         } else {
           if (!isAttacking && allowedToAttack) {
             //Good to attack
-            println("ATTACKING")
             isAttacking = true
             allowedToAttack = false
             canMove = false
@@ -187,9 +186,7 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
               }
             }, 6.0f)
           } else {
-            println("isAttacking " + isAttacking)
             if (isAttacking) {
-              println("DOING ATTACK")
               if (facingRight) axeAttackRot -= axeAngVelocity
               else axeAttackRot += axeAngVelocity
               if ((axeAttackRot < -90.0f) || (axeAttackRot > 90.0f)) {
@@ -287,6 +284,15 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
   lazy val rainMusic = Gdx.audio.newMusic(Gdx.files.internal("rain.mp3"))
   lazy val dropImage = new Texture(Gdx.files.internal("droplet.png"))
   */
+
+  lazy val hurtGuy = Gdx.audio.newSound(Gdx.files.internal("hurt_guy.wav"))
+  lazy val hurtMe = Gdx.audio.newSound(Gdx.files.internal("hurt_me.wav"))
+  lazy val ironThrow = Gdx.audio.newSound(Gdx.files.internal("iron_throw.wav"))
+
+  lazy val bgMusic = Gdx.audio.newMusic(Gdx.files.internal("bg_granny_2.wav"))
+  //lazy val bgMusic = Gdx.audio.newMusic(Gdx.files.internal("drop.wav"))
+  bgMusic.setLooping(true)
+  bgMusic.play()
   lazy val dionysusImage = new Texture(Gdx.files.internal("dionysus.png"))
   lazy val grannyImage = new Texture(Gdx.files.internal("granny.png"))
   lazy val fryingPanImage = new Texture(Gdx.files.internal("frying_pan.png"))
@@ -479,6 +485,7 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
         irons += activeIron
         activeIron = null
         scheduled = true
+        ironThrow.play(0.5f)
         Timer.schedule(new Task {
           override def run(): Unit = {
             isAttacking = false
@@ -516,10 +523,12 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
 
   def hitGranny(): Unit = {
     if(!grannyHit) {
+      hurtMe.play()
       grannyHit = true
       health -= 1
       if(health <= 0) {
         game.setScreen(new GameOverScreen(game))
+        dispose()
       }
       Timer.schedule(new Task {
         override def run(): Unit = {
@@ -574,7 +583,6 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
     minions.foreach { case minion =>
       if(minion.weaponType == Axe) {
         if(!isDefending && math.abs(minion.axeAttackRot) > 45.0f && minion.axeHitBox.overlaps(grannyHitBox)) {
-          println("Hit Granny" + TimeUtils.millis())
           hitGranny()
         }
       } else {
@@ -583,7 +591,6 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
           if(isDefending && bullet.rect.overlaps(ironingBoard)) {
             killedBullets += bullet
           } else if(bullet.rect.overlaps(grannyHitBox)) {
-            println("Hit Granny with bullet" + TimeUtils.millis())
             hitGranny()
             killedBullets += bullet
           }
@@ -595,16 +602,16 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
       if(weaponType == Iron) {
         irons.foreach { case iron =>
           if (iron.rect.overlaps(minion.rect)) {
-            println("Hit Minion with iron" + TimeUtils.millis())
             killedIrons += iron
             minion.hurt(this)
+            hurtGuy.play()
           }
         }
       } else {
         if (((math.abs(fryingPanRot) < 45.0f) || (math.abs(fryingPanRot) > 135.0f)) && fryingPanHitBox.overlaps(minion.rect)) {
-          println("Hit Minion with frying pan" + TimeUtils.millis())
           //minion.hurt(this)
           killedMinions += minion
+          hurtGuy.play()
         }
       }
     }
@@ -658,10 +665,9 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
     minions.foreach { case minion => minion.render(this) }
 
     if(bossReached) {
-      println("Boxx reached")
-      val xStart = thanatos.x- gameWidth * 0.75f
+      val xStart = thanatos.x- gameWidth * 0.7f
       val yStart = gameHeight*0.65f
-      val xStartGran = thanatos.x- gameWidth * 0.75f
+      val xStartGran = thanatos.x- gameWidth * 0.7f
       val yStartGran = gameHeight*0.25f
       if(bossState == 0) game.font.draw(game.batch, "Thanatos: You have done well to make it this far.", xStart, yStart)
       if(bossState == 1) game.font.draw(game.batch, "Thanatos: Sister Yphus...", xStart, yStart)
@@ -692,7 +698,7 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
       if(Gdx.input.isKeyJustPressed(Keys.ENTER)) {
         bossState += 1
         if(bossState == 100) { bossState = 17; }
-        if(bossState == 27) { game.setScreen(new CreditsScreen(this.game)) }
+        if(bossState == 27) { game.setScreen(new CreditsScreen(this.game));  dispose() }
         if(bossState == 12) {
           var listener = new Question1InputListener(this)
           Gdx.input.getTextInput(listener, "What is your favourite colour?", "")
@@ -730,7 +736,9 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
       if(Gdx.input.isKeyPressed(Keys.D)) { granny.x += grannyXSpeed * Gdx.graphics.getDeltaTime; lookingRight = true }
       if(Gdx.input.isKeyPressed(Keys.S)) granny.y -= grannyYSpeed * Gdx.graphics.getDeltaTime
       if(Gdx.input.isKeyPressed(Keys.W)) granny.y += grannyYSpeed * Gdx.graphics.getDeltaTime
-      if(!isDefending && !isAttacking && Gdx.input.isKeyJustPressed(Keys.SPACE)) isAttacking = true
+      if(!isDefending && !isAttacking && Gdx.input.isKeyJustPressed(Keys.SPACE)) {
+        isAttacking = true
+      }
 
       // Stay within limits
       val limitPct = 0.75f
@@ -802,7 +810,12 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
   }
 
   override def dispose() {
+    bgMusic.stop()
+    bgMusic.dispose()
     grannyImage.dispose()
+    hurtGuy.dispose()
+    hurtMe.dispose()
+    ironThrow.dispose()
     /*
     dropImage.dispose()
     dropSound.dispose()
