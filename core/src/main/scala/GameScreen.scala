@@ -107,6 +107,9 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
   val rect = new Rectangle()
   rect.width = 30
   rect.height = 60
+  val hitRect = new Rectangle()
+  hitRect.width = 5
+  hitRect.height = 50
   val axe = new Rectangle()
   val axeHitBox = new Rectangle()
   axe.width = 10
@@ -242,6 +245,13 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
     } else {
       axeHitBox.x = rect.x - rect.width * 0.9f
     }
+    if(facingRight) {
+      hitRect.x = rect.x
+      hitRect.y = rect.y
+    } else {
+      hitRect.x = rect.x + 30
+      hitRect.y = rect.y
+    }
   }
 
   def spawnBullet() {
@@ -263,6 +273,7 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
 
       //gameScreen.shapeRenderer.setColor(0, 1, 0, 1)
       //gameScreen.shapeRenderer.rect(axeHitBox.x, axeHitBox.y, axeHitBox.width, axeHitBox.height)
+      gameScreen.shapeRenderer.rect(hitRect.x, hitRect.y, hitRect.width, hitRect.height)
 
     } else {
       gameScreen.game.batch.draw(gunTexture, gun.x, gun.y, gun.height * 0.1f, gun.height / 2, gun.width, gun.height, 1.0f, 1.0f, 0, 0, 0, gunTexture.getWidth, gunTexture.getHeight, facingRight, false)
@@ -601,14 +612,14 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
       }
       if(weaponType == Iron) {
         irons.foreach { case iron =>
-          if (iron.rect.overlaps(minion.rect)) {
+          if (iron.rect.overlaps(minion.hitRect)) {
             killedIrons += iron
             minion.hurt(this)
             hurtGuy.play()
           }
         }
       } else {
-        if (((math.abs(fryingPanRot) < 45.0f) || (math.abs(fryingPanRot) > 135.0f)) && fryingPanHitBox.overlaps(minion.rect)) {
+        if (((math.abs(fryingPanRot) < 45.0f) || (math.abs(fryingPanRot) > 135.0f)) && fryingPanHitBox.overlaps(minion.hitRect)) {
           //minion.hurt(this)
           killedMinions += minion
           hurtGuy.play()

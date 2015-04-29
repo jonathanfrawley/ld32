@@ -8,8 +8,8 @@ class LudumDareSkeleton extends Game {
   lazy val font = new BitmapFont()
 
   override def create() {
-    setScreen(new MainMenuScreen(this))
-    //setScreen(new GameScreen(this))
+    //setScreen(new MainMenuScreen(this))
+    setScreen(new GameScreen(this))
     //setScreen(new CreditsScreen(this))
     //setScreen(new StoryScreen(this))
   }
