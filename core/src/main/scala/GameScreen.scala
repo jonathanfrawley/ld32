@@ -128,7 +128,7 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
   val bullets = new ArrayBuffer[Bullet]()
   var health = 5
   var isDamaged = false
-  var canMove = false
+  var canMove = true
 
   def hurt(gameScreen:GameScreen): Unit = {
     if(!isDamaged) {
@@ -273,7 +273,7 @@ class Minion(val granny:Rectangle, val texture: Texture, val axeTexture: Texture
 
       //gameScreen.shapeRenderer.setColor(0, 1, 0, 1)
       //gameScreen.shapeRenderer.rect(axeHitBox.x, axeHitBox.y, axeHitBox.width, axeHitBox.height)
-      gameScreen.shapeRenderer.rect(hitRect.x, hitRect.y, hitRect.width, hitRect.height)
+      //gameScreen.shapeRenderer.rect(hitRect.x, hitRect.y, hitRect.width, hitRect.height)
 
     } else {
       gameScreen.game.batch.draw(gunTexture, gun.x, gun.y, gun.height * 0.1f, gun.height / 2, gun.width, gun.height, 1.0f, 1.0f, 0, 0, 0, gunTexture.getWidth, gunTexture.getHeight, facingRight, false)
@@ -445,7 +445,7 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
   var grannyHit = false
 
   val redStartX = 2000
-  val redEndX = 4000
+  val redEndX = 8000
   var bossReached = false
   var bossState = 0
 
@@ -562,10 +562,25 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
 
     if((granny.x > 1000) && spawnLevel < 1) {
       spawnLevel = 1
-      for(i <- 0 to 5) spawnMinion(false)
+      for(i <- 0 to 1) spawnMinion(false)
     } else if (granny.x > 2000 && spawnLevel < 2) {
       spawnLevel = 2
       for(i <- 0 to 10) spawnMinion(false)
+    } else if (granny.x > 2000 && spawnLevel < 3) {
+      spawnLevel = 3
+      for(i <- 0 to 4) spawnMinion(false)
+    } else if (granny.x > 3000 && spawnLevel < 4) {
+      spawnLevel = 4
+      for(i <- 0 to 6) spawnMinion(false)
+    } else if (granny.x > 4000 && spawnLevel < 5) {
+      spawnLevel = 5
+      for(i <- 0 to 8) spawnMinion(false)
+    } else if (granny.x > 5000 && spawnLevel < 6) {
+      spawnLevel = 6
+      for(i <- 0 to 10) spawnMinion(false)
+    } else if (granny.x > 6000 && spawnLevel < 7) {
+      spawnLevel = 7
+      for(i <- 0 to 15) spawnMinion(false)
     }
 
     //Infinite scrolling logic
@@ -619,7 +634,7 @@ class GameScreen (val game: LudumDareSkeleton) extends Screen {
           }
         }
       } else {
-        if (((math.abs(fryingPanRot) < 45.0f) || (math.abs(fryingPanRot) > 135.0f)) && fryingPanHitBox.overlaps(minion.hitRect)) {
+        if (((math.abs(fryingPanRot) < 45.0f) || (math.abs(fryingPanRot) > 135.0f)) && fryingPanHitBox.overlaps(minion.rect)) {
           //minion.hurt(this)
           killedMinions += minion
           hurtGuy.play()
